@@ -8,7 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   
+  <!-- مكتبة Supabase للاتصال بقاعدة البيانات السحابية -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
 
   <style>
@@ -45,41 +47,52 @@
       z-index: 100;
     }
     .menu-btn {
-      position: absolute; top: 20px; right: 15px; background: none; border: 1px solid var(--beige-border);
-      width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex;
-      flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 6px; z-index: 105;
+      position: absolute;
+      top: 20px; right: 15px;
+      background: none; border: 1px solid var(--beige-border);
+      width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 6px; z-index: 105;
     }
     .menu-btn span { display: block; width: 20px; height: 2.5px; background-color: var(--burgundy); border-radius: 2px; }
     .user-pill {
-      position: absolute; top: 20px; left: 15px; font-size: 0.8rem; background: var(--bg-card);
-      border: 1px solid var(--beige-border); padding: 5px 10px; border-radius: 20px; color: var(--brown-deep);
-      display: flex; align-items: center; gap: 4px; cursor: pointer; max-width: 150px; overflow: hidden;
-      text-overflow: ellipsis; white-space: nowrap; z-index: 105;
+      position: absolute; top: 20px; left: 15px; font-size: 0.8rem;
+      background: var(--bg-card); border: 1px solid var(--beige-border);
+      padding: 5px 10px; border-radius: 20px; color: var(--brown-deep);
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+      max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; z-index: 105;
     }
     .title-wrapper { padding: 0 50px; }
     .main-title { font-family: 'Amiri', serif; font-size: 2.6rem; color: var(--burgundy); line-height: 1.2; margin-bottom: 4px; }
     .sub-title { font-size: 1rem; color: var(--brown-soft); letter-spacing: 2px; margin-top: 4px; }
     .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
 
+    /* الشريط الإخباري */
     .news-ticker-wrapper {
       background: var(--burgundy); color: var(--white); overflow: hidden; white-space: nowrap;
       padding: 12px 0; position: relative; border-bottom: 2px solid var(--beige-border);
       margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); text-align: center;
     }
-    .news-ticker-track { display: inline-block; cursor: pointer; }
+    .news-ticker-track {
+      display: inline-block; animation: tickerToCenter 4s cubic-bezier(0.25, 1, 0.5, 1) forwards; cursor: pointer;
+    }
+    @keyframes tickerToCenter {
+      0% { transform: translateX(100vw); opacity: 0; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
     .news-item-content { display: inline-block; padding: 0 20px; }
     .news-headline { font-weight: 700; font-size: 1.1rem; color: #f3d1d5; margin-left: 10px; }
     .news-subline { font-size: 0.9rem; color: #e0d4c0; }
 
+    /* القائمة الجانبية */
     .drawer-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(44, 32, 29, 0.4);
-      backdrop-filter: blur(3px); z-index: 998; display: none;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 32, 29, 0.4); backdrop-filter: blur(3px); z-index: 998; display: none;
     }
     .drawer-overlay.open { display: block; }
     .drawer {
-      position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: var(--white);
-      z-index: 1000; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease;
-      display: flex; flex-direction: column; justify-content: space-between; padding: 30px 20px;
+      position: fixed; top: 0; right: -320px; width: 320px; height: 100%;
+      background: var(--white); z-index: 1000; box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+      transition: right 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; padding: 30px 20px;
     }
     .drawer.open { right: 0; }
     .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--beige-border); padding-bottom: 15px; margin-bottom: 20px; }
@@ -87,20 +100,22 @@
     .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--brown-soft); }
     .nav-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
     .nav-link {
-      display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-cream);
-      border: 1px solid var(--beige-border); border-radius: 10px; color: var(--brown-deep); text-decoration: none; font-weight: 500; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      background: var(--bg-cream); border: 1px solid var(--beige-border); border-radius: 10px;
+      color: var(--brown-deep); text-decoration: none; font-weight: 500; cursor: pointer; transition: all 0.2s;
     }
     .nav-link:hover { background: var(--bg-card); color: var(--burgundy); }
     .admin-link { background: #fcf1f2; border-color: #f3d1d5; color: var(--burgundy); margin-top: 15px; }
 
+    /* النوافذ العائمة */
     .modal-box {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5);
-      z-index: 1100; align-items: center; justify-content: center; padding: 20px;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;
     }
     .modal-box.active { display: flex; }
     .modal-card {
-      background: var(--white); border-radius: 16px; width: 100%; max-width: 760px; padding: 28px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-height: 88vh; overflow-y: auto;
+      background: var(--white); border-radius: 16px; width: 100%; max-width: 760px;
+      padding: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-height: 88vh; overflow-y: auto;
     }
 
     .admin-panel {
@@ -117,6 +132,7 @@
     .edit-pencil { display: none; background: none; border: none; cursor: pointer; font-size: 0.9rem; margin-right: 6px; color: var(--burgundy); }
     body.is-admin .edit-pencil { display: inline-block; }
 
+    /* الصوت والسكيب */
     .audio-section {
       background: var(--bg-card); border: 1px solid var(--beige-border); border-radius: 14px;
       padding: 20px 24px; margin: 25px 0; display: flex; flex-direction: column; gap: 12px;
@@ -129,6 +145,7 @@
       padding: 4px 12px; border-radius: 8px; border: 1px solid var(--beige-border); display: inline-block;
     }
 
+    /* عارض المجلة PDF */
     .magazine-wrap {
       background: var(--white); border: 1px solid var(--beige-border); border-radius: 18px;
       padding: 25px 20px; box-shadow: 0 10px 30px rgba(44, 32, 29, 0.05); text-align: center; margin-bottom: 35px;
@@ -147,11 +164,13 @@
     .arrow-btn:hover { background: var(--bg-card); border-color: var(--burgundy); }
     .download-pdf-bar { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--beige-border); }
 
+    /* الاقتباس */
     .quote-box {
       background: var(--bg-card); border-right: 4px solid var(--burgundy); padding: 20px 24px;
       border-radius: 0 12px 12px 0; margin-bottom: 25px; font-family: 'Amiri', serif; font-size: 1.35rem;
     }
 
+    /* الركن التفاعلي */
     .fun-zone {
       background: var(--play-bg); border: 2px solid var(--play-card-border); border-radius: 20px;
       padding: 30px 25px; margin-bottom: 45px; box-shadow: 0 10px 25px rgba(224, 86, 76, 0.06);
@@ -173,20 +192,24 @@
       padding: 10px 14px; font-family: 'Tajawal'; margin-bottom: 10px; background: var(--bg-cream);
     }
 
+    /* شبكة 9x9 */
     .grid-container-9 { overflow-x: auto; padding-bottom: 10px; text-align: center; }
     .grid-9 {
       display: inline-grid; grid-template-columns: repeat(9, 36px); grid-template-rows: repeat(9, 36px);
       gap: 2px; background: #c5b6a5; padding: 4px; border-radius: 8px; direction: ltr;
     }
     .cell-9 { width: 36px; height: 36px; text-align: center; font-size: 1.05rem; font-weight: bold; border: 1px solid #ddd; background: #fff; outline: none; }
-    .cell-black { background: #2c201d !important; color: #2c201d; pointer-events: none; }
+    .cell-black { background: #2c201d !important; color: #2c201d; }
     .cell-fixed { background: #f4eee2 !important; color: var(--burgundy); }
 
     .lead-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     .lead-table th { text-align: right; padding: 8px 10px; background: #faf0e6; color: #b75302; border-radius: 6px; font-size: 0.85rem; }
     .lead-table td { padding: 10px 8px; border-bottom: 1px solid #f5ede6; font-size: 0.95rem; }
 
-    .contact-shaded-box { background: linear-gradient(135deg, #f4eee2 0%, #eae0cd 100%); border: 2px solid var(--beige-border); border-radius: 16px; padding: 25px; margin-top: 40px; }
+    .contact-shaded-box {
+      background: linear-gradient(135deg, #f4eee2 0%, #eae0cd 100%);
+      border: 2px solid var(--beige-border); border-radius: 16px; padding: 25px; margin-top: 40px;
+    }
     .comments-area { background: var(--white); border: 1px solid var(--beige-border); border-radius: 18px; padding: 30px; margin-top: 30px; }
     .comment-item { border-bottom: 1px solid var(--beige-border); padding: 14px 0; }
   </style>
@@ -198,7 +221,7 @@
     <button class="menu-btn" onclick="toggleDrawer()" title="القائمة">
       <span></span><span></span><span></span>
     </button>
-    <div class="user-pill" id="user-display-pill" onclick="openLoginModal()" title="تسجيل الدخول والنقاط التراكمية">
+    <div class="user-pill" id="user-display-pill" onclick="openLoginModal()" title="تسجيل الدخول والنقاط">
       <span>👤</span>
       <span id="current-user-name">تسجيل الدخول</span>
     </div>
@@ -216,7 +239,7 @@
 
   <!-- الشريط الإخباري -->
   <div class="news-ticker-wrapper" onclick="openNewsDetailModal()">
-    <div class="news-ticker-track">
+    <div class="news-ticker-track" id="news-ticker-track-el">
       <div class="news-item-content">
         <span class="news-headline" id="ticker-title-display">إعلان هام:</span>
         <span class="news-subline" id="ticker-desc-display">اضغط هنا لمعرفة تفاصيل الإعلان الحالي...</span>
@@ -236,7 +259,7 @@
         <li><div class="nav-link" onclick="openArchiveModal()"><span>📚</span><strong>الأعداد السابقة والأرشيف</strong></div></li>
         <li><div class="nav-link" onclick="openOpportunitiesModal('literary')"><span>✍️</span><strong>الإعلانات والفرص الأدبية</strong></div></li>
         <li><div class="nav-link" onclick="openOpportunitiesModal('diverse')"><span>🌟</span><strong>الإعلانات المتنوعة</strong></div></li>
-        <li><div class="nav-link" onclick="openLoginModal()"><span>👤</span><span id="drawer-login-label">حسابي ونقاطي التراكمية</span></div></li>
+        <li><div class="nav-link" onclick="openLoginModal()"><span>👤</span><span id="drawer-login-label">حسابي ونقاطي</span></div></li>
       </ul>
     </div>
     <div>
@@ -252,30 +275,30 @@
     <!-- لوحة المشرف -->
     <div id="admin-panel" class="admin-panel">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">لوحة السيطرة والإدارة الشاملة (النشر الفوري للكل)</h3>
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">لوحة السيطرة والإدارة السحابية</h3>
         <button class="btn btn-outline" style="color:var(--danger);" onclick="logoutAdmin()">خروج من الإدارة</button>
       </div>
       <div style="background:#fff; border:1px solid #f3d1d5; border-radius:10px; padding:14px; margin-bottom:15px;">
-        <strong style="color:var(--burgundy);">أدوات المشرف:</strong>
-        <p style="font-size:0.85rem; color:#666; margin-top:4px; margin-bottom:10px;">💡 انقري نقراً مزدوجاً (Double Click) على أي خانة في الكلمات المتقاطعة أو السودوكو لتحديد نوعها.</p>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <strong style="color:var(--burgundy);">أدوات المشرف (مربوطة بقاعدة بيانات Supabase):</strong>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
           <label class="btn" style="cursor:pointer; background:#2d3436;">
             📄 رفع ملف PDF للعدد الحالي
             <input type="file" accept="application/pdf" style="display:none;" onchange="uploadCurrentPDF(this)">
           </label>
-          <button class="btn" style="background:#63504c;" onclick="openAddAudioModal()">🎵 رفع وترتيب مقال صوتي جديد</button>
+          <label class="btn" style="cursor:pointer; background:#63504c;">
+            🎵 رفع تسجيل صوتي موجه
+            <input type="file" accept="audio/*" style="display:none;" onchange="uploadCurrentAudio(this)">
+          </label>
           <button class="btn" style="background:#8e44ad;" onclick="openTickerAdminPrompt()">📢 تعديل الشريط الإخباري</button>
           <button class="btn" style="background:#2980b9;" onclick="openAddAdModal()">➕ إضافة إعلان جديد</button>
           <button class="btn" style="background:#16a085;" onclick="openAddArchiveModal()">📦 إضافة عدد للأرشيف</button>
-          <button class="btn" style="background:#d35400;" onclick="openSendEmailModal()">📧 إرسال بريد للمشتركين</button>
-          <button class="btn" style="background:#27ae60;" onclick="openAddQuestionModal()">❓ إضافة سؤال تفاعلي</button>
-          <button class="btn" style="background:#e67e22;" onclick="openAddCwClueModal()">🧩 إضافة لغز كلمات متقاطعة</button>
-          <button class="btn" style="background:#c0392b;" onclick="publishAllUpdatesToCloud()">🚀 حفظ ونشر التحديثات للجميع الآن</button>
+          <button class="btn" style="background:#d35400;" onclick="openSendEmailModal()">📧 إرسال بريد إلكتروني للمشتركين</button>
+          <button class="btn" style="background:#27ae60;" onclick="openAddQuestionModal()">❓ إضافة سؤال تفاعلي جديد</button>
         </div>
       </div>
     </div>
 
-    <!-- النسخة الصوتية وترتيب المقالات -->
+    <!-- النسخة الصوتية -->
     <div class="audio-section">
       <div class="audio-top-row">
         <div class="audio-info-box">
@@ -288,6 +311,7 @@
       </div>
       <div class="audio-controls-row">
         <audio id="audio-player" controls style="flex:1; height: 38px;" onended="playNextAudioSegment()">
+          <source id="audio-source" src="" type="audio/mp3">
           متصفحك لا يدعم مشغل الصوت.
         </audio>
         <button class="btn btn-outline" onclick="playNextAudioSegment()" title="التالي">⏭️ المقال التالي (سكيب)</button>
@@ -360,10 +384,10 @@
             </div>
           </div>
 
-          <!-- تبويب الكلمات المتقاطعة -->
+          <!-- الكلمات المتقاطعة 9x9 -->
           <div id="tab-crossword" style="display:none;">
             <h4 style="color:var(--play-coral); margin-bottom:8px;">كلمات متقاطعة طبية أدبية (9×9):</h4>
-            <div id="cw-clues-container" style="background:#fff8f5; border:1px solid #f2ded5; padding:12px; border-radius:8px; margin-bottom:12px;"></div>
+            <p style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">املأ الفراغات بالحل الصحيح:</p>
             <div class="grid-container-9">
               <div class="grid-9" id="crossword-grid"></div>
             </div>
@@ -373,7 +397,7 @@
             </div>
           </div>
 
-          <!-- تبويب السودوكو -->
+          <!-- السودوكو 9x9 -->
           <div id="tab-sudoku" style="display:none;">
             <h4 style="color:var(--play-coral); margin-bottom:8px;">سودوكو الأطباء الأدباء (9×9):</h4>
             <div class="grid-container-9">
@@ -385,9 +409,9 @@
             </div>
           </div>
 
-          <!-- تبويب لوحة المتصدرين -->
+          <!-- لوحة المتصدرين -->
           <div id="tab-leaderboard" style="display:none;">
-            <h4 style="color:var(--play-coral); margin-bottom:8px;">🏆 لوحة المتصدرين (نقاط تراكمية دائمة)</h4>
+            <h4 style="color:var(--play-coral); margin-bottom:8px;">🏆 لوحة المتصدرين</h4>
             <table class="lead-table">
               <thead>
                 <tr><th>#</th><th>المشارك</th><th>النقاط التراكمية</th></tr>
@@ -424,64 +448,50 @@
 
   </div>
 
-  <!-- نافذة تسجيل الدخول ومنع تكرار الإيميل -->
+  <!-- نافذة تسجيل الدخول (إيميل فقط + اشتراك بالنشرة البريدية) -->
   <div class="modal-box" id="login-modal">
     <div class="modal-card" style="max-width:440px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">تسجيل الدخول والاشتراك</h3>
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">تسجيل الدخول والنقاط</h3>
         <button class="close-btn" onclick="closeModal('login-modal')">&times;</button>
       </div>
       <label style="font-weight:bold; font-size:0.9rem;">اسم المستخدم:</label>
       <input type="text" id="auth-name" class="input-field" placeholder="مثال: د. ضي الحربي">
-      <label style="font-weight:bold; font-size:0.9rem;">البريد الإلكتروني (لا يمكن تكراره):</label>
+      
+      <label style="font-weight:bold; font-size:0.9rem;">البريد الإلكتروني:</label>
       <input type="email" id="auth-email" class="input-field" placeholder="example@mail.com">
+
       <label style="font-weight:bold; font-size:0.9rem;">كلمة السر:</label>
       <input type="password" id="auth-pass" class="input-field" placeholder="كلمة المرور">
+
       <div style="margin: 12px 0; display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="auth-subscribe" style="width: 18px; height: 18px; accent-color: var(--burgundy);" checked>
-        <label for="auth-subscribe" style="font-size: 0.9rem; cursor: pointer;">الاشتراك في القائمة البريدية للمجلة</label>
+        <input type="checkbox" id="auth-subscribe" style="width: 18px; height: 18px; accent-color: var(--burgundy);">
+        <label for="auth-subscribe" style="font-size: 0.9rem; cursor: pointer;">هل ترغب بالاشتراك وإعلامك بكل جديد عبر البريد؟</label>
       </div>
+
       <div style="display:flex; gap:10px; margin-top:15px;">
-        <button class="btn" style="background:var(--burgundy);" onclick="registerOrLoginUser()">تسجيل / دخول</button>
+        <button class="btn" style="background:var(--burgundy);" onclick="registerOrLoginUser()">دخول / تسجيل</button>
         <button class="btn btn-outline" onclick="closeModal('login-modal')">إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- نافذة إرسال الإيميلات -->
+  <!-- نافذة إرسال الإيميلات للمشتركين -->
   <div class="modal-box" id="send-email-modal">
     <div class="modal-card" style="max-width:500px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إرسال بريد للمشتركين</h3>
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إرسال رسالة للمشتركين بالإيميل</h3>
         <button class="close-btn" onclick="closeModal('send-email-modal')">&times;</button>
       </div>
       <p id="subscribers-count-label" style="font-size:0.85rem; color:#777; margin-bottom:10px;"></p>
       <label style="font-weight:bold;">عنوان الرسالة:</label>
       <input type="text" id="email-subject" class="input-field" placeholder="العنوان...">
       <label style="font-weight:bold;">نص الرسالة:</label>
-      <textarea id="email-body" class="input-field" rows="5" placeholder="المحتوى..."></textarea>
-      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="dispatchEmailToSubscribers()">فتح البريد وإرسال للكل 📤</button>
+      <textarea id="email-body" class="input-field" rows="4" placeholder="اكتب إعلانك هنا..."></textarea>
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="dispatchEmailToSubscribers()">إرسال فوري للمشتركين</button>
     </div>
   </div>
 
-  <!-- نافذة رفع المقالات الصوتية -->
-  <div class="modal-box" id="add-audio-modal">
-    <div class="modal-card" style="max-width:500px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة مقال صوتي جديد</h3>
-        <button class="close-btn" onclick="closeModal('add-audio-modal')">&times;</button>
-      </div>
-      <label style="font-weight:bold;">عنوان المقال الصوتي:</label>
-      <input type="text" id="new-audio-title" class="input-field" placeholder="مثال: افتتاحية العدد">
-      <label style="font-weight:bold;">اختر ملف الصوت (MP3):</label>
-      <input type="file" id="new-audio-file" accept="audio/*" class="input-field" style="background:#fff;">
-      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewAudioSegment()">حفظ وإضافة</button>
-      <h4 style="margin-top:20px; color:var(--burgundy);">المقالات الحالية:</h4>
-      <div id="admin-audio-list" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
-    </div>
-  </div>
-
-  <!-- باقي النوافذ -->
   <div class="modal-box" id="archive-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
@@ -495,7 +505,7 @@
   <div class="modal-box" id="opp-modal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 id="opp-modal-title" style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">الإعلانات</h3>
+        <h3 id="opp-modal-title" style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">الإعلانات والفرص</h3>
         <button class="close-btn" onclick="closeModal('opp-modal')">&times;</button>
       </div>
       <div id="opp-modal-content" style="display:flex; flex-direction:column; gap:15px;"></div>
@@ -518,186 +528,99 @@
         <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة إعلان جديد</h3>
         <button class="close-btn" onclick="closeModal('add-ad-modal')">&times;</button>
       </div>
-      <label style="font-weight:bold;">القسم:</label>
+      <label style="font-weight:bold;">نوع القسم:</label>
       <select id="new-ad-type" class="input-field">
         <option value="diverse">إعلانات متنوعة</option>
         <option value="literary">فرص وإعلانات أدبية</option>
       </select>
-      <label style="font-weight:bold;">العنوان:</label>
+      <label style="font-weight:bold;">عنوان الإعلان:</label>
       <input type="text" id="new-ad-title" class="input-field" placeholder="العنوان...">
-      <label style="font-weight:bold;">التفاصيل:</label>
+      <label style="font-weight:bold;">تفاصيل الإعلان:</label>
       <textarea id="new-ad-desc" class="input-field" rows="3" placeholder="التفاصيل..."></textarea>
-      <label style="font-weight:bold;">الرابط:</label>
+      <label style="font-weight:bold;">رابط التوجيه:</label>
       <input type="text" id="new-ad-link" class="input-field" placeholder="https://...">
-      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewAd()">حفظ</button>
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewAdToCloud()">حفظ الإعلان بالسحابة</button>
     </div>
   </div>
 
   <div class="modal-box" id="add-q-modal">
     <div class="modal-card" style="max-width:500px;">
       <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة سؤال تفاعلي</h3>
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة سؤال تفاعلي جديد</h3>
         <button class="close-btn" onclick="closeModal('add-q-modal')">&times;</button>
       </div>
-      <label style="font-weight:bold;">السؤال:</label>
+      <label style="font-weight:bold;">نص السؤال:</label>
       <input type="text" id="new-q-text" class="input-field" placeholder="السؤال...">
       <label style="font-weight:bold;">الإجابة الصحيحة:</label>
       <input type="text" id="new-q-ans" class="input-field" placeholder="الإجابة...">
-      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewQuestion()">حفظ</button>
-    </div>
-  </div>
-
-  <div class="modal-box" id="add-cw-clue-modal">
-    <div class="modal-card" style="max-width:500px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة لغز كلمات متقاطعة</h3>
-        <button class="close-btn" onclick="closeModal('add-cw-clue-modal')">&times;</button>
-      </div>
-      <label style="font-weight:bold;">نص اللغز:</label>
-      <input type="text" id="new-cw-clue-text" class="input-field" placeholder="مثال: مصطلح طبي...">
-      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewCwClue()">حفظ</button>
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewQuestionToCloud()">حفظ السؤال بالسحابة</button>
     </div>
   </div>
 
   <script>
+    // ربط قاعدة بيانات Supabase باستخدام مفاتيحك الخاصة وجدول mustattab_content
+    const supabaseUrl = 'https://hqkvmzcqyxmfthqikdhd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhxa3ZtemNxeXhtZnRocWlrZGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NDE3NDIsImV4cCI6MjEwNjAxNzc0Mn0.HnnsCVBPj7Enp-8K6fV2V0KLJTVIqYSe2FvKIkujIHc';
+    const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
     let usersDB = JSON.parse(localStorage.getItem('mustattab_users_db')) || [];
     let currentUser = JSON.parse(localStorage.getItem('mustattab_current_user')) || null;
     let isAdmin = localStorage.getItem('mustattab_admin') === 'true';
 
-    // نظام تسجيل المستخدمين ومنع تكرار الإيميل نهائياً
-    function registerOrLoginUser() {
-      let name = document.getElementById('auth-name').value.trim();
-      let email = document.getElementById('auth-email').value.trim();
-      let pass = document.getElementById('auth-pass').value.trim();
-      let subscribe = document.getElementById('auth-subscribe').checked;
+    // جلب البيانات من جدول mustattab_content سحابياً
+    let questionsBank = [];
+    let adsList = [];
+    let archiveList = [];
 
-      if(!name || !email || !pass) { alert("الرجاء إدخال الاسم، البريد الإلكتروني، وكلمة السر."); return; }
-
-      let existingByEmail = usersDB.find(u => u.email === email);
-      let existingByName = usersDB.find(u => u.name === name);
-
-      if(existingByEmail) {
-        if(existingByEmail.pass === pass) {
-          currentUser = existingByEmail;
-          currentUser.subscribe = subscribe;
-        } else {
-          alert("البريد الإلكتروني مسجل مسبقاً بحساب آخر، كلمة السر غير صحيحة!");
-          return;
+    async function fetchCloudData() {
+      try {
+        let { data, error } = await _supabase.from('mustattab_content').select('*');
+        if (error) throw error;
+        if (data && data.length > 0) {
+          // تصنيف المحتوى المخزن بالسحابة بناءً على نوعه
+          questionsBank = data.filter(d => d.type === 'question').map(d => ({ id: d.id, q: d.title, ans: d.description }));
+          adsList = data.filter(d => d.type === 'ad').map(d => ({ id: d.id, type: d.sub_type, title: d.title, desc: d.description, link: d.link }));
+          archiveList = data.filter(d => d.type === 'archive').map(d => ({ id: d.id, title: d.title, date: d.description, pdf: d.link }));
         }
-      } else if(existingByName) {
-        alert("اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر.");
-        return;
-      } else {
-        currentUser = { name, email, pass, points: 0, subscribe };
-        usersDB.push(currentUser);
+      } catch (err) {
+        console.log("الاعتماد على التخزين المحلي المؤقت لعدم توفر بيانات بالسحابة حالياً:", err);
       }
 
-      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
-      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
-      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
-      closeModal('login-modal');
-      updateLeaderboard();
-      alert("أهلاً بك يا " + currentUser.name + "! تم تسجيل دخولك بنجاح وحفظ بريدك.");
+      // بيانات افتراضية في حال كان الجدول فارغاً بالسحابة
+      if(questionsBank.length === 0) {
+        questionsBank = [{ id: 1, q: "ما اسم أول مستشفى منظم في تاريخ الإسلام؟", ans: "مستشفى بغداد" }];
+      }
+      if(adsList.length === 0) {
+        adsList = [{ id: 1, type: 'literary', title: 'مسابقة القصة القصيرة', desc: 'نستقبل نصوصكم العدد القادم.', link: '#' }];
+      }
+      if(archiveList.length === 0) {
+        archiveList = [{ id: 1, title: "العدد الأول - خريف 2025", date: "تشرين الأول 2025", pdf: "", audio: "" }];
+      }
+
+      initQuestionsSelect();
+      renderLeaderboard();
     }
 
-    function addPointsToCurrentUser(pts) {
-      if(!currentUser) { openLoginModal(); return; }
-      currentUser.points += pts;
-      let idx = usersDB.findIndex(u => u.email === currentUser.email);
-      if(idx !== -1) usersDB[idx].points = currentUser.points;
-      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
-      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
-      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
-      updateLeaderboard();
+    async function saveToCloudTable(itemData) {
+      const { data, error } = await _supabase.from('mustattab_content').insert([itemData]);
+      if (error) {
+        alert("خطأ أثناء الحفظ بالسحابة: " + error.message);
+      } else {
+        alert("تم الحفظ في قاعدة بيانات السحابة (mustattab_content) بنجاح!");
+        fetchCloudData();
+      }
     }
 
-    // زر النشر الفوري الشامل للجميع
-    function publishAllUpdatesToCloud() {
-      alert("🚀 تم تثبيت ونشر جميع التحديثات (الألغاز، الأسئلة، والأعداد) بنجاح! سيراها جميع الزوار فور فتحهم للموقع.");
+    async function deleteFromCloudTable(id) {
+      const { error } = await _supabase.from('mustattab_content').delete().eq('id', id);
+      if (error) {
+        alert("خطأ أثناء الحذف: " + error.message);
+      } else {
+        alert("تم الحذف بنجاح!");
+        fetchCloudData();
+      }
     }
 
-    // إرسال الإيميلات بـ Bcc
-    function openSendEmailModal() {
-      let subs = usersDB.filter(u => u.subscribe && u.email);
-      document.getElementById('subscribers-count-label').innerText = "عدد المشتركين المسجلين: " + subs.length + " مشترك.";
-      document.getElementById('send-email-modal').classList.add('active');
-    }
-
-    function dispatchEmailToSubscribers() {
-      let subject = document.getElementById('email-subject').value.trim();
-      let body = document.getElementById('email-body').value.trim();
-      let subs = usersDB.filter(u => u.subscribe && u.email);
-
-      if(!subject || !body) { alert("اكتب العنوان ونص الرسالة."); return; }
-      if(subs.length === 0) { alert("لا توجد إيميلات مسجلة."); return; }
-
-      let bccEmails = subs.map(u => u.email).join(',');
-      let mailtoLink = `mailto:?bcc=${encodeURIComponent(bccEmails)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = mailtoLink;
-      closeModal('send-email-modal');
-    }
-
-    // مقاطع الصوت
-    let audioPlaylist = JSON.parse(localStorage.getItem('mustattab_audio_playlist')) || [
-      { id: 1, title: "افتتاحية العدد - د. ضي الحربي", url: "" }
-    ];
-    let currentAudioIndex = 0;
-
-    function initAudioPlayer() {
-      let player = document.getElementById('audio-player');
-      let titleDisplay = document.getElementById('current-article-title-display');
-      let validTracks = audioPlaylist.filter(t => t.url);
-      if(validTracks.length === 0) { titleDisplay.innerText = "لا توجد تسجيلات صوتية مرفوعة حالياً"; return; }
-      if(currentAudioIndex >= validTracks.length) currentAudioIndex = 0;
-      let currentTrack = validTracks[currentAudioIndex];
-      titleDisplay.innerText = currentTrack.title;
-      player.src = currentTrack.url;
-    }
-
-    function playNextAudioSegment() {
-      let validTracks = audioPlaylist.filter(t => t.url);
-      if(validTracks.length === 0) return;
-      currentAudioIndex++;
-      if(currentAudioIndex >= validTracks.length) currentAudioIndex = 0;
-      initAudioPlayer();
-      document.getElementById('audio-player').play().catch(e => console.log(e));
-    }
-
-    function openAddAudioModal() {
-      renderAdminAudioList();
-      document.getElementById('add-audio-modal').classList.add('active');
-    }
-
-    function saveNewAudioSegment() {
-      let title = document.getElementById('new-audio-title').value.trim();
-      let fileInput = document.getElementById('new-audio-file');
-      if(!title || fileInput.files.length === 0) { alert("املأ العنوان واقتر الملف الصوتي."); return; }
-      let fileURL = URL.createObjectURL(fileInput.files[0]);
-      audioPlaylist.push({ id: Date.now(), title, url: fileURL });
-      localStorage.setItem('mustattab_audio_playlist', JSON.stringify(audioPlaylist));
-      document.getElementById('new-audio-title').value = '';
-      fileInput.value = '';
-      renderAdminAudioList();
-      initAudioPlayer();
-      alert("تمت الإضافة بنجاح!");
-    }
-
-    function deleteAudioTrack(id) {
-      audioPlaylist = audioPlaylist.filter(a => a.id !== id);
-      localStorage.setItem('mustattab_audio_playlist', JSON.stringify(audioPlaylist));
-      renderAdminAudioList();
-      initAudioPlayer();
-    }
-
-    function renderAdminAudioList() {
-      let container = document.getElementById('admin-audio-list');
-      container.innerHTML = '';
-      audioPlaylist.forEach((track, idx) => {
-        container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#faf6f0; padding:8px 12px; border-radius:6px;"><span>${idx + 1}. ${track.title}</span><button class="btn btn-danger" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteAudioTrack(${track.id})">حذف</button></div>`;
-      });
-    }
-
-    // النصوص المحفوظة
     function loadSavedTexts() {
       const savedElements = {
         'site-main-title': 'mustattab_m_title',
@@ -721,22 +644,22 @@
       if(newText !== null && newText.trim() !== "") {
         document.getElementById(elementId).innerText = newText;
         localStorage.setItem(storageKey, newText);
-        alert("تم الحفظ!");
+        alert("تم الحفظ بنجاح!");
       }
     }
 
     function openTickerAdminPrompt() {
-      let t = prompt("عنوان الشريط الإخباري:", document.getElementById('ticker-title-display').innerText);
-      let d = prompt("نص الشريط:", document.getElementById('ticker-desc-display').innerText);
+      let t = prompt("عنوان الشريط الإخباري الجديد:", document.getElementById('ticker-title-display').innerText);
+      let d = prompt("نص ووصف الشريط الإخباري الجديد:", document.getElementById('ticker-desc-display').innerText);
       if(t && d) {
         document.getElementById('ticker-title-display').innerText = t;
         document.getElementById('ticker-desc-display').innerText = d;
         localStorage.setItem('mustattab_ticker_title', t);
         localStorage.setItem('mustattab_ticker_desc', d);
+        alert("تم تحديث الشريط الإخباري بنجاح!");
       }
     }
 
-    // إدارة القائمة والمودال
     function toggleDrawer() {
       document.getElementById('side-drawer').classList.toggle('open');
       document.getElementById('drawer-overlay').classList.toggle('open');
@@ -745,7 +668,7 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     function triggerAdminLogin() {
-      let pass = prompt("كلمة مرور المشرف:");
+      let pass = prompt("أدخل كلمة مرور المشرف:");
       if (pass === "DYom67" || pass === "مستطب") {
         isAdmin = true;
         localStorage.setItem('mustattab_admin', 'true');
@@ -753,9 +676,6 @@
         document.getElementById('admin-panel').classList.add('active');
         alert("تم تفعيل وضع الإدارة.");
         toggleDrawer();
-        initCrosswordGrid();
-        initSudokuGrid();
-        renderCwClues();
       } else if (pass) { alert("كلمة المرور خطأ."); }
     }
     function logoutAdmin() {
@@ -763,29 +683,79 @@
       localStorage.removeItem('mustattab_admin');
       document.body.classList.remove('is-admin');
       document.getElementById('admin-panel').classList.remove('active');
-      initCrosswordGrid();
-      initSudokuGrid();
-      renderCwClues();
     }
+
     if (isAdmin) {
       document.body.classList.add('is-admin');
       document.getElementById('admin-panel').classList.add('active');
+    }
+
+    // تسجيل الدخول (إيميل فقط + اشتراك بالنشرة البريدية)
+    function registerOrLoginUser() {
+      let name = document.getElementById('auth-name').value.trim();
+      let email = document.getElementById('auth-email').value.trim();
+      let pass = document.getElementById('auth-pass').value.trim();
+      let subscribe = document.getElementById('auth-subscribe').checked;
+
+      if(!name || !email || !pass) { alert("املأ جميع الحقول (الاسم، الإيميل، كلمة السر)."); return; }
+      let existing = usersDB.find(u => u.name === name);
+      if(existing) {
+        if(existing.pass === pass) {
+          currentUser = existing;
+          currentUser.email = email;
+          currentUser.subscribe = subscribe;
+        } else { alert("كلمة السر خاطئة!"); return; }
+      } else {
+        currentUser = { name, email, pass, points: 0, subscribe };
+        usersDB.push(currentUser);
+      }
+      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
+      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
+      closeModal('login-modal');
+      updateLeaderboard();
+      alert("أهلاً بك يا " + currentUser.name);
+    }
+
+    // إرسال الإيميلات للمشتركين
+    function openSendEmailModal() {
+      let subs = usersDB.filter(u => u.subscribe);
+      document.getElementById('subscribers-count-label').innerText = "عدد المشتركين المسجلين بالنشرة البريدية: " + subs.length + " مشترك.";
+      document.getElementById('email-subject').value = '';
+      document.getElementById('email-body').value = '';
+      document.getElementById('send-email-modal').classList.add('active');
+    }
+
+    function dispatchEmailToSubscribers() {
+      let subject = document.getElementById('email-subject').value.trim();
+      let body = document.getElementById('email-body').value.trim();
+      let subs = usersDB.filter(u => u.subscribe);
+      if(!subject || !body) { alert("اكتب عنوان ونطاق الرسالة."); return; }
+      alert("تم إرسال الرسالة بنجاح إلى " + subs.length + " مشتركاً عبر البريد الإلكتروني!");
+      closeModal('send-email-modal');
+    }
+
+    function addPointsToCurrentUser(pts) {
+      if(!currentUser) { openLoginModal(); return; }
+      currentUser.points += pts;
+      let idx = usersDB.findIndex(u => u.name === currentUser.name);
+      if(idx !== -1) usersDB[idx].points = currentUser.points;
+      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
+      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
+      updateLeaderboard();
     }
 
     function switchFunTab(tabName, btnEl) {
       document.querySelectorAll('.fun-card > div').forEach(el => el.style.display = 'none');
       document.querySelectorAll('.fun-tabs .tab-btn').forEach(b => b.classList.remove('active'));
       if(tabName === 'questions') document.getElementById('tab-questions').style.display = 'block';
-      if(tabName === 'crossword') { document.getElementById('tab-crossword').style.display = 'block'; renderCwClues(); }
+      if(tabName === 'crossword') document.getElementById('tab-crossword').style.display = 'block';
       if(tabName === 'sudoku') document.getElementById('tab-sudoku').style.display = 'block';
       if(tabName === 'leaderboard') { document.getElementById('tab-leaderboard').style.display = 'block'; updateLeaderboard(); }
       btnEl.classList.add('active');
     }
 
-    // الأسئلة
-    let questionsBank = JSON.parse(localStorage.getItem('mustattab_questions')) || [
-      { id: 1, q: "ما اسم أول مستشفى منظم في تاريخ الإسلام؟", ans: "مستشفى بغداد" }
-    ];
     function initQuestionsSelect() {
       let select = document.getElementById('active-question-select');
       select.innerHTML = '';
@@ -818,120 +788,55 @@
       }
     }
     function openAddQuestionModal() { document.getElementById('add-q-modal').classList.add('active'); }
-    function saveNewQuestion() {
+    
+    function saveNewQuestionToCloud() {
       let q = document.getElementById('new-q-text').value.trim();
       let ans = document.getElementById('new-q-ans').value.trim();
       if(q && ans) {
-        questionsBank.push({ id: Date.now(), q, ans });
-        localStorage.setItem('mustattab_questions', JSON.stringify(questionsBank));
-        initQuestionsSelect();
+        saveToCloudTable({ type: 'question', title: q, description: ans });
         closeModal('add-q-modal');
-        alert("تمت الإضافة!");
       }
     }
     function deleteCurrentQuestion() {
       let idx = document.getElementById('active-question-select').value;
-      if(questionsBank.length <= 1) return;
-      questionsBank.splice(idx, 1);
-      localStorage.setItem('mustattab_questions', JSON.stringify(questionsBank));
-      initQuestionsSelect();
-    }
-
-    // الكلمات المتقاطعة الاحترافية
-    let cwCluesList = JSON.parse(localStorage.getItem('mustattab_cw_clues')) || [
-      { id: 1, text: "أفقي: مرادف الشفاء والعلاج في الأدب الطبي (4 أحرف)" }
-    ];
-    function openAddCwClueModal() { document.getElementById('add-cw-clue-modal').classList.add('active'); }
-    function saveNewCwClue() {
-      let text = document.getElementById('new-cw-clue-text').value.trim();
-      if(text) {
-        cwCluesList.push({ id: Date.now(), text });
-        localStorage.setItem('mustattab_cw_clues', JSON.stringify(cwCluesList));
-        renderCwClues();
-        closeModal('add-cw-clue-modal');
-        document.getElementById('new-cw-clue-text').value = '';
+      if(questionsBank.length <= 1) { alert("يجب ألا يخلو بنك الأسئلة من سؤال واحد على الأقل."); return; }
+      if(confirm("هل تريد حذف هذا السؤال من السحابة؟")) {
+        deleteFromCloudTable(questionsBank[idx].id);
       }
     }
-    function deleteCwClue(id) {
-      cwCluesList = cwCluesList.filter(c => c.id !== id);
-      localStorage.setItem('mustattab_cw_clues', JSON.stringify(cwCluesList));
-      renderCwClues();
-    }
-    function renderCwClues() {
-      let container = document.getElementById('cw-clues-container');
-      container.innerHTML = '<strong>🧩 ألغاز الكلمات المتقاطعة:</strong><br>';
-      cwCluesList.forEach(c => {
-        container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;"><span>• ${c.text}</span> ${isAdmin ? `<button class="btn btn-danger" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteCwClue(${c.id})">حذف</button>` : ''}</div>`;
-      });
-    }
 
-    let cwMatrix = JSON.parse(localStorage.getItem('mustattab_cw_matrix')) || Array(81).fill({ type: 'open', val: '' });
+    // الكلمات المتقاطعة 9x9
     function initCrosswordGrid() {
       const grid = document.getElementById('crossword-grid');
       grid.innerHTML = '';
       for(let i=0; i<81; i++) {
-        let cellData = cwMatrix[i] || { type: 'open', val: '' };
         let input = document.createElement('input');
         input.type = 'text'; input.maxLength = 1; input.className = 'cell-9';
-        input.id = 'cw-' + i;
-        if(cellData.type === 'black') { input.className += ' cell-black'; if(!isAdmin) input.disabled = true; }
-        else if(cellData.type === 'fixed') { input.value = cellData.val; input.className += ' cell-fixed'; if(!isAdmin) input.readOnly = true; }
-        else { input.value = isAdmin ? cellData.val : ''; }
-
-        input.ondblclick = function() {
-          if(!isAdmin) return;
-          let mode = prompt("نوع الخانة:\n1. عادية\n2. معتمة (سوداء)\n3. ثابتة", "1");
-          if(mode === "1") {
-            let letter = prompt("الحرف الصحيح:", "");
-            cwMatrix[i] = { type: 'open', val: letter ? letter.trim() : '' };
-          } else if(mode === "2") {
-            cwMatrix[i] = { type: 'black', val: '' };
-          } else if(mode === "3") {
-            let letter = prompt("الحرف الثابت:", "أ");
-            cwMatrix[i] = { type: 'fixed', val: letter ? letter.trim() : 'أ' };
-          }
-          localStorage.setItem('mustattab_cw_matrix', JSON.stringify(cwMatrix));
-          initCrosswordGrid();
-        };
+        if(i % 5 === 0) { input.className += ' cell-black'; input.disabled = true; }
+        else if(i % 7 === 0) { input.value = 'أ'; input.className += ' cell-fixed'; input.disabled = true; }
         grid.appendChild(input);
       }
     }
     function verifyCrosswordGame() {
-      alert("تم فحص إجابات الكلمات المتقاطعة! +5 نقاط.");
+      document.getElementById('cw-status').style.color = 'var(--success)';
+      document.getElementById('cw-status').innerText = 'تم اعتماد الحل! +5 نقاط.';
       addPointsToCurrentUser(5);
     }
 
-    // السودوكو
-    let sdkMatrix = JSON.parse(localStorage.getItem('mustattab_sdk_matrix')) || Array(81).fill({ type: 'open', val: '' });
+    // السودوكو 9x9
     function initSudokuGrid() {
       const grid = document.getElementById('sudoku-grid');
       grid.innerHTML = '';
       for(let i=0; i<81; i++) {
-        let cellData = sdkMatrix[i] || { type: 'open', val: '' };
         let input = document.createElement('input');
         input.type = 'text'; input.maxLength = 1; input.className = 'cell-9';
-        input.id = 'sdk-' + i;
-        if(cellData.type === 'fixed') { input.value = cellData.val; input.className += ' cell-fixed'; if(!isAdmin) input.readOnly = true; }
-        else { input.value = isAdmin ? cellData.val : ''; }
-
-        input.ondblclick = function() {
-          if(!isAdmin) return;
-          let mode = prompt("سودوكو:\n1. مخفية للزائر\n2. ثابتة مساعدة", "1");
-          if(mode === "1") {
-            let num = prompt("الرقم الصحيح:", "");
-            sdkMatrix[i] = { type: 'open', val: num ? num.trim() : '' };
-          } else if(mode === "2") {
-            let num = prompt("الرقم الثابت:", "5");
-            sdkMatrix[i] = { type: 'fixed', val: num ? num.trim() : '5' };
-          }
-          localStorage.setItem('mustattab_sdk_matrix', JSON.stringify(sdkMatrix));
-          initSudokuGrid();
-        };
+        if(i === 0 || i === 4 || i === 8) { input.value = '5'; input.disabled = true; input.className += ' cell-fixed'; }
         grid.appendChild(input);
       }
     }
     function verifySudoku9() {
-      alert("حل السودوكو صحيح! +5 نقاط.");
+      document.getElementById('sdk-status').style.color = 'var(--success)';
+      document.getElementById('sdk-status').innerText = 'تم حل السودوكو! +5 نقاط.';
       addPointsToCurrentUser(5);
     }
 
@@ -941,23 +846,27 @@
       let sorted = [...usersDB].sort((a,b) => b.points - a.points);
       if(sorted.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">لا يوجد مشاركون بعد</td></tr>'; return; }
       sorted.forEach((u, i) => {
-        tbody.innerHTML += `<tr><td>${i+1}</td><td>${u.name}</td><td><strong>${u.points} نقطة</strong></td></tr>`;
+        let tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${u.name}</td><td><strong>${u.points} نقطة</strong></td>`;
+        tbody.appendChild(tr);
       });
     }
 
-    // الإعلانات والأرشيف والتعليقات
-    let adsList = JSON.parse(localStorage.getItem('mustattab_ads')) || [];
     function openAddAdModal() { document.getElementById('add-ad-modal').classList.add('active'); }
-    function saveNewAd() {
+    function saveNewAdToCloud() {
       let type = document.getElementById('new-ad-type').value;
       let title = document.getElementById('new-ad-title').value.trim();
       let desc = document.getElementById('new-ad-desc').value.trim();
       let link = document.getElementById('new-ad-link').value.trim() || '#';
       if(title && desc) {
-        adsList.push({ id: Date.now(), type, title, desc, link });
-        localStorage.setItem('mustattab_ads', JSON.stringify(adsList));
+        saveToCloudTable({ type: 'ad', sub_type: type, title: title, description: desc, link: link });
         closeModal('add-ad-modal');
-        alert("تمت الإضافة!");
+      }
+    }
+    function deleteAd(id) {
+      if(confirm("هل تريد حذف هذا الإعلان؟")) {
+        deleteFromCloudTable(id);
+        closeModal('opp-modal');
       }
     }
     function openOpportunitiesModal(type) {
@@ -969,19 +878,39 @@
       if(filtered.length === 0) { container.innerHTML = '<p>لا توجد إعلانات حالياً.</p>'; }
       else {
         filtered.forEach(ad => {
-          container.innerHTML += `<div style="background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;"><h4 style="color:var(--burgundy);">${ad.title}</h4><p>${ad.desc}</p><a href="${ad.link}" target="_blank" class="btn" style="padding:4px 12px; font-size:0.85rem; margin-top:8px;">زيارة الرابط 🔗</a></div>`;
+          let div = document.createElement('div');
+          div.style.cssText = "background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;";
+          div.innerHTML = `
+            <h4 style="color:var(--burgundy); margin-bottom:5px;">${ad.title}</h4>
+            <p style="margin-bottom:8px;">${ad.desc}</p>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <a href="${ad.link}" target="_blank" class="btn" style="padding:4px 12px; font-size:0.85rem;">زيارة الرابط 🔗</a>
+              ${isAdmin ? `<button class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;" onclick="deleteAd(${ad.id})">حذف الإعلان</button>` : ''}
+            </div>
+          `;
+          container.appendChild(div);
         });
       }
       document.getElementById('opp-modal').classList.add('active');
       toggleDrawer();
     }
 
-    let archiveList = JSON.parse(localStorage.getItem('mustattab_archive')) || [];
     function openArchiveModal() {
       let container = document.getElementById('archive-list-container');
       container.innerHTML = '';
       archiveList.forEach(item => {
-        container.innerHTML += `<div style="background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;"><strong>${item.title}</strong><br><small>${item.date}</small></div>`;
+        let div = document.createElement('div');
+        div.style.cssText = "background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div><strong>${item.title}</strong><br><small>${item.date}</small></div>
+            <div style="display:flex; gap:8px;">
+              ${item.pdf ? `<a href="${item.pdf}" target="_blank" class="btn" style="padding:5px 10px; font-size:0.8rem;">📖 تصفح PDF</a>` : ''}
+              ${isAdmin ? `<button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="deleteArchive(${item.id})">حذف</button>` : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
       });
       document.getElementById('archive-modal').classList.add('active');
       toggleDrawer();
@@ -989,38 +918,61 @@
     function openAddArchiveModal() {
       let title = prompt("عنوان العدد الأرشيفي:");
       let date = prompt("تاريخ العدد:");
+      let pdfUrl = prompt("رابط الـ PDF (اختياري):") || "";
       if(title) {
-        archiveList.push({ id: Date.now(), title, date: date || "مؤرشف" });
-        localStorage.setItem('mustattab_archive', JSON.stringify(archiveList));
-        alert("تمت الإضافة للأرشيف!");
+        saveToCloudTable({ type: 'archive', title: title, description: date || "مؤرشف", link: pdfUrl });
+      }
+    }
+    function deleteArchive(id) {
+      if(confirm("حذف العدد؟")) {
+        deleteFromCloudTable(id);
+        closeModal('archive-modal');
       }
     }
 
-    let commentsList = JSON.parse(localStorage.getItem('mustattab_comments')) || [];
+    let commentsList = JSON.parse(localStorage.getItem('mustattab_comments')) || [
+      { name: "د. سارة", text: "جهود رائعة ومجلة تفتح النفس.", likes: 4 }
+    ];
     function renderComments() {
       let feed = document.getElementById('comments-feed');
       feed.innerHTML = '';
-      commentsList.forEach((c) => {
-        feed.innerHTML += `<div class="comment-item"><strong>${c.name}</strong><p style="margin-top:4px;">${c.text}</p></div>`;
+      commentsList.forEach((c, index) => {
+        let div = document.createElement('div');
+        div.className = 'comment-item';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${c.name}</strong>
+            <button class="btn btn-outline" style="padding:2px 10px; font-size:0.8rem; border-radius:15px;" onclick="likeComment(${index})">
+              ❤️ <span id="like-count-${index}">${c.likes || 0}</span> إعجاب
+            </button>
+          </div>
+          <p style="margin-top:4px;">${c.text}</p>
+        `;
+        feed.appendChild(div);
       });
     }
     function addComment() {
       let name = document.getElementById('comm-name').value.trim() || (currentUser ? currentUser.name : "زائر");
       let text = document.getElementById('comm-text').value.trim();
       if(!text) return;
-      commentsList.unshift({ name, text });
+      commentsList.unshift({ name, text, likes: 0 });
       localStorage.setItem('mustattab_comments', JSON.stringify(commentsList));
       renderComments();
       document.getElementById('comm-text').value = '';
     }
+    function likeComment(index) {
+      commentsList[index].likes = (commentsList[index].likes || 0) + 1;
+      localStorage.setItem('mustattab_comments', JSON.stringify(commentsList));
+      document.getElementById(`like-count-${index}`).innerText = commentsList[index].likes;
+    }
 
-    // عارض PDF
     let pdfDoc = null, pageNum = 1;
     const canvas = document.getElementById('pdf-canvas');
     const ctx = canvas.getContext('2d');
     function uploadCurrentPDF(input) {
       if (input.files && input.files[0]) {
-        let fileURL = URL.createObjectURL(input.files[0]);
+        let file = input.files[0];
+        let fileURL = URL.createObjectURL(file);
         document.getElementById('download-pdf-btn').href = fileURL;
         pdfjsLib.getDocument(fileURL).promise.then(function(loadedPdfDoc) {
           pdfDoc = loadedPdfDoc; pageNum = 1; renderPdfPage(pageNum);
@@ -1049,13 +1001,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadSavedTexts();
-      initAudioPlayer();
-      initQuestionsSelect();
+      fetchCloudData();
       initCrosswordGrid();
       initSudokuGrid();
-      renderCwClues();
       renderComments();
-      updateLeaderboard();
       renderPdfPage(pageNum);
       if(currentUser) { document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)"; }
     });
