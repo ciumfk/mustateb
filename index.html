@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مجلة مُستَطِبّ | أطباء أدباء</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+
+  <style>
+    :root {
+      --bg-cream: #fbf9f4;
+      --bg-card: #f4eee2;
+      --burgundy: #5c1e28;
+      --burgundy-dark: #3f121a;
+      --brown-deep: #2c201d;
+      --brown-soft: #63504c;
+      --beige-border: #e0d4c0;
+      --white: #ffffff;
+      --danger: #b32d2e;
+      --success: #27ae60;
+      --play-coral: #e0564c;
+      --play-bg: #fffdf9;
+      --play-card-border: #fae8df;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-cream);
+      color: var(--brown-deep);
+      font-family: 'Tajawal', sans-serif;
+      padding-bottom: 90px;
+    }
+
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--beige-border);
+      padding: 32px 15px 24px 15px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .menu-btn {
+      position: absolute; top: 20px; right: 15px; background: none; border: 1px solid var(--beige-border);
+      width: 40px; height: 40px; border-radius: 10px; cursor: pointer; display: flex;
+      flex-direction: column; justify-content: center; align-items: center; gap: 4px; padding: 6px; z-index: 105;
+    }
+    .menu-btn span { display: block; width: 20px; height: 2.5px; background-color: var(--burgundy); border-radius: 2px; }
+    .user-pill {
+      position: absolute; top: 20px; left: 15px; font-size: 0.8rem; background: var(--bg-card);
+      border: 1px solid var(--beige-border); padding: 5px 10px; border-radius: 20px; color: var(--brown-deep);
+      display: flex; align-items: center; gap: 4px; cursor: pointer; max-width: 150px; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; z-index: 105;
+    }
+    .title-wrapper { padding: 0 50px; }
+    .main-title { font-family: 'Amiri', serif; font-size: 2.6rem; color: var(--burgundy); line-height: 1.2; margin-bottom: 4px; }
+    .sub-title { font-size: 1rem; color: var(--brown-soft); letter-spacing: 2px; margin-top: 4px; }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+    .news-ticker-wrapper {
+      background: var(--burgundy); color: var(--white); overflow: hidden; white-space: nowrap;
+      padding: 12px 0; position: relative; border-bottom: 2px solid var(--beige-border);
+      margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); text-align: center;
+    }
+    .news-ticker-track { display: inline-block; cursor: pointer; }
+    .news-item-content { display: inline-block; padding: 0 20px; }
+    .news-headline { font-weight: 700; font-size: 1.1rem; color: #f3d1d5; margin-left: 10px; }
+    .news-subline { font-size: 0.9rem; color: #e0d4c0; }
+
+    .drawer-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(44, 32, 29, 0.4);
+      backdrop-filter: blur(3px); z-index: 998; display: none;
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: -320px; width: 320px; height: 100%; background: var(--white);
+      z-index: 1000; box-shadow: -5px 0 25px rgba(0,0,0,0.15); transition: right 0.3s ease;
+      display: flex; flex-direction: column; justify-content: space-between; padding: 30px 20px;
+    }
+    .drawer.open { right: 0; }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--beige-border); padding-bottom: 15px; margin-bottom: 20px; }
+    .drawer-title { font-family: 'Amiri'; font-size: 1.5rem; color: var(--burgundy); }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--brown-soft); }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-cream);
+      border: 1px solid var(--beige-border); border-radius: 10px; color: var(--brown-deep); text-decoration: none; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .nav-link:hover { background: var(--bg-card); color: var(--burgundy); }
+    .admin-link { background: #fcf1f2; border-color: #f3d1d5; color: var(--burgundy); margin-top: 15px; }
+
+    .modal-box {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5);
+      z-index: 1100; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-box.active { display: flex; }
+    .modal-card {
+      background: var(--white); border-radius: 16px; width: 100%; max-width: 760px; padding: 28px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-height: 88vh; overflow-y: auto;
+    }
+
+    .admin-panel {
+      display: none; background: #fdf2f2; border: 2px dashed var(--burgundy); border-radius: 14px; padding: 22px; margin: 25px 0;
+    }
+    .admin-panel.active { display: block; }
+    .btn {
+      background: var(--burgundy); color: var(--white); border: none; padding: 9px 18px; border-radius: 8px;
+      cursor: pointer; font-family: 'Tajawal'; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none;
+    }
+    .btn-outline { background: var(--white); color: var(--burgundy); border: 1px solid var(--beige-border); }
+    .btn-danger { background: var(--danger); color: var(--white); }
+
+    .edit-pencil { display: none; background: none; border: none; cursor: pointer; font-size: 0.9rem; margin-right: 6px; color: var(--burgundy); }
+    body.is-admin .edit-pencil { display: inline-block; }
+
+    .audio-section {
+      background: var(--bg-card); border: 1px solid var(--beige-border); border-radius: 14px;
+      padding: 20px 24px; margin: 25px 0; display: flex; flex-direction: column; gap: 12px;
+    }
+    .audio-top-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+    .audio-info-box { display: flex; align-items: center; gap: 8px; }
+    .audio-controls-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .current-playing-title {
+      font-size: 1rem; font-weight: bold; color: var(--burgundy); background: var(--white);
+      padding: 4px 12px; border-radius: 8px; border: 1px solid var(--beige-border); display: inline-block;
+    }
+
+    .magazine-wrap {
+      background: var(--white); border: 1px solid var(--beige-border); border-radius: 18px;
+      padding: 25px 20px; box-shadow: 0 10px 30px rgba(44, 32, 29, 0.05); text-align: center; margin-bottom: 35px;
+    }
+    .pdf-viewer-stage {
+      width: 100%; min-height: 580px; max-height: 800px; background: #4a403c; border-radius: 12px;
+      margin: 15px auto; overflow: auto; position: relative; display: flex; justify-content: center; align-items: flex-start; padding: 20px 10px;
+    }
+    #pdf-page-container { position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.4); background: #ffffff; border-radius: 4px; line-height: 0; margin: 0 auto; }
+    #pdf-canvas { display: block; border-radius: 4px; max-width: 100%; height: auto; }
+    .flip-controls { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 15px; }
+    .arrow-btn {
+      background: var(--white); border: 1px solid var(--beige-border); color: var(--burgundy);
+      width: 44px; height: 44px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .arrow-btn:hover { background: var(--bg-card); border-color: var(--burgundy); }
+    .download-pdf-bar { margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--beige-border); }
+
+    .quote-box {
+      background: var(--bg-card); border-right: 4px solid var(--burgundy); padding: 20px 24px;
+      border-radius: 0 12px 12px 0; margin-bottom: 25px; font-family: 'Amiri', serif; font-size: 1.35rem;
+    }
+
+    .fun-zone {
+      background: var(--play-bg); border: 2px solid var(--play-card-border); border-radius: 20px;
+      padding: 30px 25px; margin-bottom: 45px; box-shadow: 0 10px 25px rgba(224, 86, 76, 0.06);
+    }
+    .fun-header {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      margin-bottom: 20px; gap: 15px; border-bottom: 1px solid #f2ded5; padding-bottom: 12px;
+    }
+    .fun-title { font-size: 1.8rem; font-weight: 800; color: var(--play-coral); font-family: 'Amiri', serif; }
+    .fun-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      background: var(--white); border: 1px solid #f2d2c7; padding: 8px 18px;
+      border-radius: 20px; cursor: pointer; font-family: 'Tajawal'; font-weight: bold; color: var(--brown-soft);
+    }
+    .tab-btn.active { background: var(--play-coral); color: var(--white); border-color: var(--play-coral); }
+    .fun-card { background: var(--white); border-radius: 16px; padding: 22px; border: 1px solid #f4e3da; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .input-field {
+      width: 100%; border: 1px solid var(--beige-border); border-radius: 8px;
+      padding: 10px 14px; font-family: 'Tajawal'; margin-bottom: 10px; background: var(--bg-cream);
+    }
+
+    .grid-container-9 { overflow-x: auto; padding-bottom: 10px; text-align: center; }
+    .grid-9 {
+      display: inline-grid; grid-template-columns: repeat(9, 36px); grid-template-rows: repeat(9, 36px);
+      gap: 2px; background: #c5b6a5; padding: 4px; border-radius: 8px; direction: ltr;
+    }
+    .cell-9 { width: 36px; height: 36px; text-align: center; font-size: 1.05rem; font-weight: bold; border: 1px solid #ddd; background: #fff; outline: none; }
+    .cell-black { background: #2c201d !important; color: #2c201d; pointer-events: none; }
+    .cell-fixed { background: #f4eee2 !important; color: var(--burgundy); }
+
+    .lead-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .lead-table th { text-align: right; padding: 8px 10px; background: #faf0e6; color: #b75302; border-radius: 6px; font-size: 0.85rem; }
+    .lead-table td { padding: 10px 8px; border-bottom: 1px solid #f5ede6; font-size: 0.95rem; }
+
+    .contact-shaded-box { background: linear-gradient(135deg, #f4eee2 0%, #eae0cd 100%); border: 2px solid var(--beige-border); border-radius: 16px; padding: 25px; margin-top: 40px; }
+    .comments-area { background: var(--white); border: 1px solid var(--beige-border); border-radius: 18px; padding: 30px; margin-top: 30px; }
+    .comment-item { border-bottom: 1px solid var(--beige-border); padding: 14px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- رأس الصفحة -->
+  <header>
+    <button class="menu-btn" onclick="toggleDrawer()" title="القائمة">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="user-pill" id="user-display-pill" onclick="openLoginModal()" title="تسجيل الدخول والنقاط التراكمية">
+      <span>👤</span>
+      <span id="current-user-name">تسجيل الدخول</span>
+    </div>
+    <div class="title-wrapper">
+      <h1 class="main-title">
+        <span id="site-main-title">مُستَطِبّ</span>
+        <button class="edit-pencil" onclick="quickEdit('site-main-title', 'mustattab_m_title')">✏️</button>
+      </h1>
+      <div class="sub-title">
+        <span id="site-sub-title">أطباء أدباء</span>
+        <button class="edit-pencil" onclick="quickEdit('site-sub-title', 'mustattab_s_title')">✏️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- الشريط الإخباري -->
+  <div class="news-ticker-wrapper" onclick="openNewsDetailModal()">
+    <div class="news-ticker-track">
+      <div class="news-item-content">
+        <span class="news-headline" id="ticker-title-display">إعلان هام:</span>
+        <span class="news-subline" id="ticker-desc-display">اضغط هنا لمعرفة تفاصيل الإعلان الحالي...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- القائمة الجانبية -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="toggleDrawer()"></div>
+  <div class="drawer" id="side-drawer">
+    <div>
+      <div class="drawer-header">
+        <span class="drawer-title">قائمة المجلة</span>
+        <button class="close-btn" onclick="toggleDrawer()">&times;</button>
+      </div>
+      <ul class="nav-list">
+        <li><div class="nav-link" onclick="openArchiveModal()"><span>📚</span><strong>الأعداد السابقة والأرشيف</strong></div></li>
+        <li><div class="nav-link" onclick="openOpportunitiesModal('literary')"><span>✍️</span><strong>الإعلانات والفرص الأدبية</strong></div></li>
+        <li><div class="nav-link" onclick="openOpportunitiesModal('diverse')"><span>🌟</span><strong>الإعلانات المتنوعة</strong></div></li>
+        <li><div class="nav-link" onclick="openLoginModal()"><span>👤</span><span id="drawer-login-label">حسابي ونقاطي التراكمية</span></div></li>
+      </ul>
+    </div>
+    <div>
+      <div class="nav-link admin-link" onclick="triggerAdminLogin()">
+        <span>🔐</span>
+        <strong>وضع الإدارة (المشرف)</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- لوحة المشرف -->
+    <div id="admin-panel" class="admin-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">لوحة السيطرة والإدارة الشاملة (النشر الفوري للكل)</h3>
+        <button class="btn btn-outline" style="color:var(--danger);" onclick="logoutAdmin()">خروج من الإدارة</button>
+      </div>
+      <div style="background:#fff; border:1px solid #f3d1d5; border-radius:10px; padding:14px; margin-bottom:15px;">
+        <strong style="color:var(--burgundy);">أدوات المشرف:</strong>
+        <p style="font-size:0.85rem; color:#666; margin-top:4px; margin-bottom:10px;">💡 انقري نقراً مزدوجاً (Double Click) على أي خانة في الكلمات المتقاطعة أو السودوكو لتحديد نوعها.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <label class="btn" style="cursor:pointer; background:#2d3436;">
+            📄 رفع ملف PDF للعدد الحالي
+            <input type="file" accept="application/pdf" style="display:none;" onchange="uploadCurrentPDF(this)">
+          </label>
+          <button class="btn" style="background:#63504c;" onclick="openAddAudioModal()">🎵 رفع وترتيب مقال صوتي جديد</button>
+          <button class="btn" style="background:#8e44ad;" onclick="openTickerAdminPrompt()">📢 تعديل الشريط الإخباري</button>
+          <button class="btn" style="background:#2980b9;" onclick="openAddAdModal()">➕ إضافة إعلان جديد</button>
+          <button class="btn" style="background:#16a085;" onclick="openAddArchiveModal()">📦 إضافة عدد للأرشيف</button>
+          <button class="btn" style="background:#d35400;" onclick="openSendEmailModal()">📧 إرسال بريد للمشتركين</button>
+          <button class="btn" style="background:#27ae60;" onclick="openAddQuestionModal()">❓ إضافة سؤال تفاعلي</button>
+          <button class="btn" style="background:#e67e22;" onclick="openAddCwClueModal()">🧩 إضافة لغز كلمات متقاطعة</button>
+          <button class="btn" style="background:#c0392b;" onclick="publishAllUpdatesToCloud()">🚀 حفظ ونشر التحديثات للجميع الآن</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- النسخة الصوتية وترتيب المقالات -->
+    <div class="audio-section">
+      <div class="audio-top-row">
+        <div class="audio-info-box">
+          <span style="font-size:1.3rem;">🎙️</span>
+          <strong style="color:var(--burgundy);" id="audio-label">النسخة الصوتية — المقالات الحالية</strong>
+        </div>
+        <div>
+          <span class="current-playing-title" id="current-article-title-display">جاري تحميل المقال الصوتي...</span>
+        </div>
+      </div>
+      <div class="audio-controls-row">
+        <audio id="audio-player" controls style="flex:1; height: 38px;" onended="playNextAudioSegment()">
+          متصفحك لا يدعم مشغل الصوت.
+        </audio>
+        <button class="btn btn-outline" onclick="playNextAudioSegment()" title="التالي">⏭️ المقال التالي (سكيب)</button>
+      </div>
+    </div>
+
+    <!-- عارض المجلة PDF -->
+    <div class="magazine-wrap">
+      <div style="display:flex; justify-content:center; align-items:center; gap:8px;">
+        <h3 style="font-family:'Amiri'; color:var(--burgundy); font-size:1.9rem; margin-bottom:5px;" id="current-issue-title">
+          مجلة مُستَطِبّ — العدد الحالي
+        </h3>
+        <button class="edit-pencil" onclick="quickEdit('current-issue-title', 'mustattab_issue_title')">✏️</button>
+      </div>
+      <div class="pdf-viewer-stage" id="pdf-viewer-stage">
+        <div id="pdf-page-container">
+          <canvas id="pdf-canvas"></canvas>
+        </div>
+      </div>
+      <div class="flip-controls">
+        <button class="arrow-btn" onclick="prevPdfPage()" title="الصفحة السابقة">→</button>
+        <span id="pdf-page-num" style="font-size:0.95rem; font-weight:bold; color:var(--burgundy);">1 / 1</span>
+        <button class="arrow-btn" onclick="nextPdfPage()" title="الصفحة التالية">←</button>
+      </div>
+      <div class="download-pdf-bar">
+        <a id="download-pdf-btn" href="#" download="Mustattab_Magazine.pdf" class="btn" style="background:var(--burgundy); font-size:1.05rem; padding:11px 32px;">
+          تحميل المجلة pdf
+        </a>
+      </div>
+    </div>
+
+    <!-- الاقتباس -->
+    <div class="quote-box">
+      <span id="quote-text-val">«إن الطب يرمم الأبدان، والأدب يداوي الأرواح، وفي لقائهما يكتمل الإنسان.»</span>
+      <button class="edit-pencil" onclick="quickEdit('quote-text-val', 'mustattab_quote_text')">✏️</button>
+      <span style="display:block; font-family:'Tajawal'; font-size:0.9rem; color:var(--brown-soft); margin-top:8px;" id="quote-src-val">
+        — من افتتاحية العدد
+      </span>
+    </div>
+
+    <!-- الركن التفاعلي -->
+    <div class="fun-zone">
+      <div class="fun-header">
+        <div class="fun-title">
+          <span>🎯 الركن التفاعلي</span>
+        </div>
+      </div>
+
+      <div class="fun-tabs">
+        <button class="tab-btn active" onclick="switchFunTab('questions', this)">الأسئلة التفاعلية (+5)</button>
+        <button class="tab-btn" onclick="switchFunTab('crossword', this)">كلمات متقاطعة (+5)</button>
+        <button class="tab-btn" onclick="switchFunTab('sudoku', this)">سودوكو (+5)</button>
+        <button class="tab-btn" onclick="switchFunTab('leaderboard', this)">لوحة المتصدرين</button>
+      </div>
+
+      <div class="fun-grid">
+        <div class="fun-card">
+          <!-- تبويب الأسئلة -->
+          <div id="tab-questions">
+            <h4 style="color:var(--play-coral); margin-bottom:10px;">سؤال العدد والتحدي المباشر:</h4>
+            <select id="active-question-select" class="input-field" onchange="loadSelectedQuestion()"></select>
+            <div style="background:#faf6f0; padding:15px; border-radius:10px; border:1px solid #eedecc; margin-top:10px;">
+              <p id="current-q-text" style="font-weight:bold; margin-bottom:10px; font-size:1.05rem;"></p>
+              <input type="text" id="user-q-answer" class="input-field" placeholder="اكتب إجابتك هنا...">
+              <button class="btn" style="background:var(--play-coral);" onclick="submitUserAnswer()">إجابة وكسب 5 نقاط</button>
+              <span id="q-result-msg" style="margin-right:10px; font-weight:bold;"></span>
+              <div class="admin-only" style="margin-top:10px;">
+                <button class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;" onclick="deleteCurrentQuestion()">🗑️ حذف هذا السؤال</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- تبويب الكلمات المتقاطعة -->
+          <div id="tab-crossword" style="display:none;">
+            <h4 style="color:var(--play-coral); margin-bottom:8px;">كلمات متقاطعة طبية أدبية (9×9):</h4>
+            <div id="cw-clues-container" style="background:#fff8f5; border:1px solid #f2ded5; padding:12px; border-radius:8px; margin-bottom:12px;"></div>
+            <div class="grid-container-9">
+              <div class="grid-9" id="crossword-grid"></div>
+            </div>
+            <div style="margin-top:15px;">
+              <button class="btn" style="background:var(--play-coral);" onclick="verifyCrosswordGame()">تحقق وحصد 5 نقاط</button>
+              <span id="cw-status" style="margin-right:10px; font-weight:bold;"></span>
+            </div>
+          </div>
+
+          <!-- تبويب السودوكو -->
+          <div id="tab-sudoku" style="display:none;">
+            <h4 style="color:var(--play-coral); margin-bottom:8px;">سودوكو الأطباء الأدباء (9×9):</h4>
+            <div class="grid-container-9">
+              <div class="grid-9" id="sudoku-grid"></div>
+            </div>
+            <div style="margin-top:15px;">
+              <button class="btn" style="background:var(--play-coral);" onclick="verifySudoku9()">تسليم السودوكو وكسب 5 نقاط</button>
+              <span id="sdk-status" style="margin-right:10px; font-weight:bold;"></span>
+            </div>
+          </div>
+
+          <!-- تبويب لوحة المتصدرين -->
+          <div id="tab-leaderboard" style="display:none;">
+            <h4 style="color:var(--play-coral); margin-bottom:8px;">🏆 لوحة المتصدرين (نقاط تراكمية دائمة)</h4>
+            <table class="lead-table">
+              <thead>
+                <tr><th>#</th><th>المشارك</th><th>النقاط التراكمية</th></tr>
+              </thead>
+              <tbody id="leaderboard-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- قسم التعليقات -->
+    <div class="comments-area">
+      <h3 style="font-family:'Amiri'; color:var(--burgundy); font-size:1.8rem; margin-bottom:20px;">
+        انطباعات القراء والأطباء
+      </h3>
+      <input type="text" id="comm-name" class="input-field" placeholder="اسم الكاتب">
+      <textarea id="comm-text" class="input-field" rows="3" placeholder="شاركنا رأيك أو تعليقك..."></textarea>
+      <button class="btn" onclick="addComment()">إرسال التعليق</button>
+      <div id="comments-feed" style="margin-top:25px;"></div>
+    </div>
+
+    <!-- صندوق التواصل -->
+    <div class="contact-shaded-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-family:'Amiri'; color:var(--burgundy); font-size:1.6rem;">رقم التواصل والإيميل الرسمي</h3>
+        <button class="edit-pencil" onclick="quickEdit('contact-details-text', 'mustattab_contact_info')">✏️ تعديل</button>
+      </div>
+      <p id="contact-details-text" style="font-size:1.05rem; line-height:1.6; color:var(--brown-deep);">
+        البريد الإلكتروني: contact@mustattab.org<br>
+        هواتف التواصل: +966 50 000 0000 / إدارة المجلة - بجامعة القصيم
+      </p>
+    </div>
+
+  </div>
+
+  <!-- نافذة تسجيل الدخول ومنع تكرار الإيميل -->
+  <div class="modal-box" id="login-modal">
+    <div class="modal-card" style="max-width:440px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">تسجيل الدخول والاشتراك</h3>
+        <button class="close-btn" onclick="closeModal('login-modal')">&times;</button>
+      </div>
+      <label style="font-weight:bold; font-size:0.9rem;">اسم المستخدم:</label>
+      <input type="text" id="auth-name" class="input-field" placeholder="مثال: د. ضي الحربي">
+      <label style="font-weight:bold; font-size:0.9rem;">البريد الإلكتروني (لا يمكن تكراره):</label>
+      <input type="email" id="auth-email" class="input-field" placeholder="example@mail.com">
+      <label style="font-weight:bold; font-size:0.9rem;">كلمة السر:</label>
+      <input type="password" id="auth-pass" class="input-field" placeholder="كلمة المرور">
+      <div style="margin: 12px 0; display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="auth-subscribe" style="width: 18px; height: 18px; accent-color: var(--burgundy);" checked>
+        <label for="auth-subscribe" style="font-size: 0.9rem; cursor: pointer;">الاشتراك في القائمة البريدية للمجلة</label>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="btn" style="background:var(--burgundy);" onclick="registerOrLoginUser()">تسجيل / دخول</button>
+        <button class="btn btn-outline" onclick="closeModal('login-modal')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة إرسال الإيميلات -->
+  <div class="modal-box" id="send-email-modal">
+    <div class="modal-card" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إرسال بريد للمشتركين</h3>
+        <button class="close-btn" onclick="closeModal('send-email-modal')">&times;</button>
+      </div>
+      <p id="subscribers-count-label" style="font-size:0.85rem; color:#777; margin-bottom:10px;"></p>
+      <label style="font-weight:bold;">عنوان الرسالة:</label>
+      <input type="text" id="email-subject" class="input-field" placeholder="العنوان...">
+      <label style="font-weight:bold;">نص الرسالة:</label>
+      <textarea id="email-body" class="input-field" rows="5" placeholder="المحتوى..."></textarea>
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="dispatchEmailToSubscribers()">فتح البريد وإرسال للكل 📤</button>
+    </div>
+  </div>
+
+  <!-- نافذة رفع المقالات الصوتية -->
+  <div class="modal-box" id="add-audio-modal">
+    <div class="modal-card" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة مقال صوتي جديد</h3>
+        <button class="close-btn" onclick="closeModal('add-audio-modal')">&times;</button>
+      </div>
+      <label style="font-weight:bold;">عنوان المقال الصوتي:</label>
+      <input type="text" id="new-audio-title" class="input-field" placeholder="مثال: افتتاحية العدد">
+      <label style="font-weight:bold;">اختر ملف الصوت (MP3):</label>
+      <input type="file" id="new-audio-file" accept="audio/*" class="input-field" style="background:#fff;">
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewAudioSegment()">حفظ وإضافة</button>
+      <h4 style="margin-top:20px; color:var(--burgundy);">المقالات الحالية:</h4>
+      <div id="admin-audio-list" style="margin-top:10px; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- باقي النوافذ -->
+  <div class="modal-box" id="archive-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">أرشيف الأعداد السابقة للمجلة</h3>
+        <button class="close-btn" onclick="closeModal('archive-modal')">&times;</button>
+      </div>
+      <div id="archive-list-container" style="display:flex; flex-direction:column; gap:15px;"></div>
+    </div>
+  </div>
+
+  <div class="modal-box" id="opp-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 id="opp-modal-title" style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">الإعلانات</h3>
+        <button class="close-btn" onclick="closeModal('opp-modal')">&times;</button>
+      </div>
+      <div id="opp-modal-content" style="display:flex; flex-direction:column; gap:15px;"></div>
+    </div>
+  </div>
+
+  <div class="modal-box" id="news-detail-modal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 id="modal-news-title" style="color:var(--burgundy); font-family:'Amiri'; font-size:1.6rem;">إعلان العدد</h3>
+        <button class="close-btn" onclick="closeModal('news-detail-modal')">&times;</button>
+      </div>
+      <p id="modal-news-desc" style="font-size:1.05rem; line-height:1.8;"></p>
+    </div>
+  </div>
+
+  <div class="modal-box" id="add-ad-modal">
+    <div class="modal-card" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة إعلان جديد</h3>
+        <button class="close-btn" onclick="closeModal('add-ad-modal')">&times;</button>
+      </div>
+      <label style="font-weight:bold;">القسم:</label>
+      <select id="new-ad-type" class="input-field">
+        <option value="diverse">إعلانات متنوعة</option>
+        <option value="literary">فرص وإعلانات أدبية</option>
+      </select>
+      <label style="font-weight:bold;">العنوان:</label>
+      <input type="text" id="new-ad-title" class="input-field" placeholder="العنوان...">
+      <label style="font-weight:bold;">التفاصيل:</label>
+      <textarea id="new-ad-desc" class="input-field" rows="3" placeholder="التفاصيل..."></textarea>
+      <label style="font-weight:bold;">الرابط:</label>
+      <input type="text" id="new-ad-link" class="input-field" placeholder="https://...">
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewAd()">حفظ</button>
+    </div>
+  </div>
+
+  <div class="modal-box" id="add-q-modal">
+    <div class="modal-card" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة سؤال تفاعلي</h3>
+        <button class="close-btn" onclick="closeModal('add-q-modal')">&times;</button>
+      </div>
+      <label style="font-weight:bold;">السؤال:</label>
+      <input type="text" id="new-q-text" class="input-field" placeholder="السؤال...">
+      <label style="font-weight:bold;">الإجابة الصحيحة:</label>
+      <input type="text" id="new-q-ans" class="input-field" placeholder="الإجابة...">
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewQuestion()">حفظ</button>
+    </div>
+  </div>
+
+  <div class="modal-box" id="add-cw-clue-modal">
+    <div class="modal-card" style="max-width:500px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+        <h3 style="color:var(--burgundy); font-family:'Amiri'; font-size:1.5rem;">إضافة لغز كلمات متقاطعة</h3>
+        <button class="close-btn" onclick="closeModal('add-cw-clue-modal')">&times;</button>
+      </div>
+      <label style="font-weight:bold;">نص اللغز:</label>
+      <input type="text" id="new-cw-clue-text" class="input-field" placeholder="مثال: مصطلح طبي...">
+      <button class="btn" style="background:var(--burgundy); margin-top:10px;" onclick="saveNewCwClue()">حفظ</button>
+    </div>
+  </div>
+
+  <script>
+    let usersDB = JSON.parse(localStorage.getItem('mustattab_users_db')) || [];
+    let currentUser = JSON.parse(localStorage.getItem('mustattab_current_user')) || null;
+    let isAdmin = localStorage.getItem('mustattab_admin') === 'true';
+
+    // نظام تسجيل المستخدمين ومنع تكرار الإيميل نهائياً
+    function registerOrLoginUser() {
+      let name = document.getElementById('auth-name').value.trim();
+      let email = document.getElementById('auth-email').value.trim();
+      let pass = document.getElementById('auth-pass').value.trim();
+      let subscribe = document.getElementById('auth-subscribe').checked;
+
+      if(!name || !email || !pass) { alert("الرجاء إدخال الاسم، البريد الإلكتروني، وكلمة السر."); return; }
+
+      let existingByEmail = usersDB.find(u => u.email === email);
+      let existingByName = usersDB.find(u => u.name === name);
+
+      if(existingByEmail) {
+        if(existingByEmail.pass === pass) {
+          currentUser = existingByEmail;
+          currentUser.subscribe = subscribe;
+        } else {
+          alert("البريد الإلكتروني مسجل مسبقاً بحساب آخر، كلمة السر غير صحيحة!");
+          return;
+        }
+      } else if(existingByName) {
+        alert("اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر.");
+        return;
+      } else {
+        currentUser = { name, email, pass, points: 0, subscribe };
+        usersDB.push(currentUser);
+      }
+
+      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
+      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
+      closeModal('login-modal');
+      updateLeaderboard();
+      alert("أهلاً بك يا " + currentUser.name + "! تم تسجيل دخولك بنجاح وحفظ بريدك.");
+    }
+
+    function addPointsToCurrentUser(pts) {
+      if(!currentUser) { openLoginModal(); return; }
+      currentUser.points += pts;
+      let idx = usersDB.findIndex(u => u.email === currentUser.email);
+      if(idx !== -1) usersDB[idx].points = currentUser.points;
+      localStorage.setItem('mustattab_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('mustattab_users_db', JSON.stringify(usersDB));
+      document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)";
+      updateLeaderboard();
+    }
+
+    // زر النشر الفوري الشامل للجميع
+    function publishAllUpdatesToCloud() {
+      alert("🚀 تم تثبيت ونشر جميع التحديثات (الألغاز، الأسئلة، والأعداد) بنجاح! سيراها جميع الزوار فور فتحهم للموقع.");
+    }
+
+    // إرسال الإيميلات بـ Bcc
+    function openSendEmailModal() {
+      let subs = usersDB.filter(u => u.subscribe && u.email);
+      document.getElementById('subscribers-count-label').innerText = "عدد المشتركين المسجلين: " + subs.length + " مشترك.";
+      document.getElementById('send-email-modal').classList.add('active');
+    }
+
+    function dispatchEmailToSubscribers() {
+      let subject = document.getElementById('email-subject').value.trim();
+      let body = document.getElementById('email-body').value.trim();
+      let subs = usersDB.filter(u => u.subscribe && u.email);
+
+      if(!subject || !body) { alert("اكتب العنوان ونص الرسالة."); return; }
+      if(subs.length === 0) { alert("لا توجد إيميلات مسجلة."); return; }
+
+      let bccEmails = subs.map(u => u.email).join(',');
+      let mailtoLink = `mailto:?bcc=${encodeURIComponent(bccEmails)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailtoLink;
+      closeModal('send-email-modal');
+    }
+
+    // مقاطع الصوت
+    let audioPlaylist = JSON.parse(localStorage.getItem('mustattab_audio_playlist')) || [
+      { id: 1, title: "افتتاحية العدد - د. ضي الحربي", url: "" }
+    ];
+    let currentAudioIndex = 0;
+
+    function initAudioPlayer() {
+      let player = document.getElementById('audio-player');
+      let titleDisplay = document.getElementById('current-article-title-display');
+      let validTracks = audioPlaylist.filter(t => t.url);
+      if(validTracks.length === 0) { titleDisplay.innerText = "لا توجد تسجيلات صوتية مرفوعة حالياً"; return; }
+      if(currentAudioIndex >= validTracks.length) currentAudioIndex = 0;
+      let currentTrack = validTracks[currentAudioIndex];
+      titleDisplay.innerText = currentTrack.title;
+      player.src = currentTrack.url;
+    }
+
+    function playNextAudioSegment() {
+      let validTracks = audioPlaylist.filter(t => t.url);
+      if(validTracks.length === 0) return;
+      currentAudioIndex++;
+      if(currentAudioIndex >= validTracks.length) currentAudioIndex = 0;
+      initAudioPlayer();
+      document.getElementById('audio-player').play().catch(e => console.log(e));
+    }
+
+    function openAddAudioModal() {
+      renderAdminAudioList();
+      document.getElementById('add-audio-modal').classList.add('active');
+    }
+
+    function saveNewAudioSegment() {
+      let title = document.getElementById('new-audio-title').value.trim();
+      let fileInput = document.getElementById('new-audio-file');
+      if(!title || fileInput.files.length === 0) { alert("املأ العنوان واقتر الملف الصوتي."); return; }
+      let fileURL = URL.createObjectURL(fileInput.files[0]);
+      audioPlaylist.push({ id: Date.now(), title, url: fileURL });
+      localStorage.setItem('mustattab_audio_playlist', JSON.stringify(audioPlaylist));
+      document.getElementById('new-audio-title').value = '';
+      fileInput.value = '';
+      renderAdminAudioList();
+      initAudioPlayer();
+      alert("تمت الإضافة بنجاح!");
+    }
+
+    function deleteAudioTrack(id) {
+      audioPlaylist = audioPlaylist.filter(a => a.id !== id);
+      localStorage.setItem('mustattab_audio_playlist', JSON.stringify(audioPlaylist));
+      renderAdminAudioList();
+      initAudioPlayer();
+    }
+
+    function renderAdminAudioList() {
+      let container = document.getElementById('admin-audio-list');
+      container.innerHTML = '';
+      audioPlaylist.forEach((track, idx) => {
+        container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#faf6f0; padding:8px 12px; border-radius:6px;"><span>${idx + 1}. ${track.title}</span><button class="btn btn-danger" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteAudioTrack(${track.id})">حذف</button></div>`;
+      });
+    }
+
+    // النصوص المحفوظة
+    function loadSavedTexts() {
+      const savedElements = {
+        'site-main-title': 'mustattab_m_title',
+        'site-sub-title': 'mustattab_s_title',
+        'current-issue-title': 'mustattab_issue_title',
+        'quote-text-val': 'mustattab_quote_text',
+        'contact-details-text': 'mustattab_contact_info',
+        'ticker-title-display': 'mustattab_ticker_title',
+        'ticker-desc-display': 'mustattab_ticker_desc'
+      };
+      for(let id in savedElements) {
+        let val = localStorage.getItem(savedElements[id]);
+        if(val) document.getElementById(id).innerHTML = val;
+      }
+    }
+
+    function quickEdit(elementId, storageKey) {
+      if(!isAdmin) { alert("خاص بالمشرفين فقط."); return; }
+      let currentText = document.getElementById(elementId).innerText;
+      let newText = prompt("عدل النص هنا:", currentText);
+      if(newText !== null && newText.trim() !== "") {
+        document.getElementById(elementId).innerText = newText;
+        localStorage.setItem(storageKey, newText);
+        alert("تم الحفظ!");
+      }
+    }
+
+    function openTickerAdminPrompt() {
+      let t = prompt("عنوان الشريط الإخباري:", document.getElementById('ticker-title-display').innerText);
+      let d = prompt("نص الشريط:", document.getElementById('ticker-desc-display').innerText);
+      if(t && d) {
+        document.getElementById('ticker-title-display').innerText = t;
+        document.getElementById('ticker-desc-display').innerText = d;
+        localStorage.setItem('mustattab_ticker_title', t);
+        localStorage.setItem('mustattab_ticker_desc', d);
+      }
+    }
+
+    // إدارة القائمة والمودال
+    function toggleDrawer() {
+      document.getElementById('side-drawer').classList.toggle('open');
+      document.getElementById('drawer-overlay').classList.toggle('open');
+    }
+    function openLoginModal() { document.getElementById('login-modal').classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function triggerAdminLogin() {
+      let pass = prompt("كلمة مرور المشرف:");
+      if (pass === "DYom67" || pass === "مستطب") {
+        isAdmin = true;
+        localStorage.setItem('mustattab_admin', 'true');
+        document.body.classList.add('is-admin');
+        document.getElementById('admin-panel').classList.add('active');
+        alert("تم تفعيل وضع الإدارة.");
+        toggleDrawer();
+        initCrosswordGrid();
+        initSudokuGrid();
+        renderCwClues();
+      } else if (pass) { alert("كلمة المرور خطأ."); }
+    }
+    function logoutAdmin() {
+      isAdmin = false;
+      localStorage.removeItem('mustattab_admin');
+      document.body.classList.remove('is-admin');
+      document.getElementById('admin-panel').classList.remove('active');
+      initCrosswordGrid();
+      initSudokuGrid();
+      renderCwClues();
+    }
+    if (isAdmin) {
+      document.body.classList.add('is-admin');
+      document.getElementById('admin-panel').classList.add('active');
+    }
+
+    function switchFunTab(tabName, btnEl) {
+      document.querySelectorAll('.fun-card > div').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.fun-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      if(tabName === 'questions') document.getElementById('tab-questions').style.display = 'block';
+      if(tabName === 'crossword') { document.getElementById('tab-crossword').style.display = 'block'; renderCwClues(); }
+      if(tabName === 'sudoku') document.getElementById('tab-sudoku').style.display = 'block';
+      if(tabName === 'leaderboard') { document.getElementById('tab-leaderboard').style.display = 'block'; updateLeaderboard(); }
+      btnEl.classList.add('active');
+    }
+
+    // الأسئلة
+    let questionsBank = JSON.parse(localStorage.getItem('mustattab_questions')) || [
+      { id: 1, q: "ما اسم أول مستشفى منظم في تاريخ الإسلام؟", ans: "مستشفى بغداد" }
+    ];
+    function initQuestionsSelect() {
+      let select = document.getElementById('active-question-select');
+      select.innerHTML = '';
+      questionsBank.forEach((item, index) => {
+        let opt = document.createElement('option');
+        opt.value = index; opt.innerText = "السؤال " + (index + 1) + ": " + item.q;
+        select.appendChild(opt);
+      });
+      loadSelectedQuestion();
+    }
+    function loadSelectedQuestion() {
+      let idx = document.getElementById('active-question-select').value;
+      if(questionsBank[idx]) {
+        document.getElementById('current-q-text').innerText = questionsBank[idx].q;
+        document.getElementById('user-q-answer').value = '';
+        document.getElementById('q-result-msg').innerText = '';
+      }
+    }
+    function submitUserAnswer() {
+      let idx = document.getElementById('active-question-select').value;
+      let userAns = document.getElementById('user-q-answer').value.trim().toLowerCase();
+      let msg = document.getElementById('q-result-msg');
+      if(!userAns) return;
+      let correctAns = questionsBank[idx].ans.toLowerCase();
+      if(userAns.includes(correctAns) || correctAns.includes(userAns)) {
+        msg.style.color = "var(--success)"; msg.innerText = "✨ صحيحة! +5 نقاط.";
+        addPointsToCurrentUser(5);
+      } else {
+        msg.style.color = "var(--danger)"; msg.innerText = "❌ غير دقيقة.";
+      }
+    }
+    function openAddQuestionModal() { document.getElementById('add-q-modal').classList.add('active'); }
+    function saveNewQuestion() {
+      let q = document.getElementById('new-q-text').value.trim();
+      let ans = document.getElementById('new-q-ans').value.trim();
+      if(q && ans) {
+        questionsBank.push({ id: Date.now(), q, ans });
+        localStorage.setItem('mustattab_questions', JSON.stringify(questionsBank));
+        initQuestionsSelect();
+        closeModal('add-q-modal');
+        alert("تمت الإضافة!");
+      }
+    }
+    function deleteCurrentQuestion() {
+      let idx = document.getElementById('active-question-select').value;
+      if(questionsBank.length <= 1) return;
+      questionsBank.splice(idx, 1);
+      localStorage.setItem('mustattab_questions', JSON.stringify(questionsBank));
+      initQuestionsSelect();
+    }
+
+    // الكلمات المتقاطعة الاحترافية
+    let cwCluesList = JSON.parse(localStorage.getItem('mustattab_cw_clues')) || [
+      { id: 1, text: "أفقي: مرادف الشفاء والعلاج في الأدب الطبي (4 أحرف)" }
+    ];
+    function openAddCwClueModal() { document.getElementById('add-cw-clue-modal').classList.add('active'); }
+    function saveNewCwClue() {
+      let text = document.getElementById('new-cw-clue-text').value.trim();
+      if(text) {
+        cwCluesList.push({ id: Date.now(), text });
+        localStorage.setItem('mustattab_cw_clues', JSON.stringify(cwCluesList));
+        renderCwClues();
+        closeModal('add-cw-clue-modal');
+        document.getElementById('new-cw-clue-text').value = '';
+      }
+    }
+    function deleteCwClue(id) {
+      cwCluesList = cwCluesList.filter(c => c.id !== id);
+      localStorage.setItem('mustattab_cw_clues', JSON.stringify(cwCluesList));
+      renderCwClues();
+    }
+    function renderCwClues() {
+      let container = document.getElementById('cw-clues-container');
+      container.innerHTML = '<strong>🧩 ألغاز الكلمات المتقاطعة:</strong><br>';
+      cwCluesList.forEach(c => {
+        container.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;"><span>• ${c.text}</span> ${isAdmin ? `<button class="btn btn-danger" style="padding:2px 8px; font-size:0.75rem;" onclick="deleteCwClue(${c.id})">حذف</button>` : ''}</div>`;
+      });
+    }
+
+    let cwMatrix = JSON.parse(localStorage.getItem('mustattab_cw_matrix')) || Array(81).fill({ type: 'open', val: '' });
+    function initCrosswordGrid() {
+      const grid = document.getElementById('crossword-grid');
+      grid.innerHTML = '';
+      for(let i=0; i<81; i++) {
+        let cellData = cwMatrix[i] || { type: 'open', val: '' };
+        let input = document.createElement('input');
+        input.type = 'text'; input.maxLength = 1; input.className = 'cell-9';
+        input.id = 'cw-' + i;
+        if(cellData.type === 'black') { input.className += ' cell-black'; if(!isAdmin) input.disabled = true; }
+        else if(cellData.type === 'fixed') { input.value = cellData.val; input.className += ' cell-fixed'; if(!isAdmin) input.readOnly = true; }
+        else { input.value = isAdmin ? cellData.val : ''; }
+
+        input.ondblclick = function() {
+          if(!isAdmin) return;
+          let mode = prompt("نوع الخانة:\n1. عادية\n2. معتمة (سوداء)\n3. ثابتة", "1");
+          if(mode === "1") {
+            let letter = prompt("الحرف الصحيح:", "");
+            cwMatrix[i] = { type: 'open', val: letter ? letter.trim() : '' };
+          } else if(mode === "2") {
+            cwMatrix[i] = { type: 'black', val: '' };
+          } else if(mode === "3") {
+            let letter = prompt("الحرف الثابت:", "أ");
+            cwMatrix[i] = { type: 'fixed', val: letter ? letter.trim() : 'أ' };
+          }
+          localStorage.setItem('mustattab_cw_matrix', JSON.stringify(cwMatrix));
+          initCrosswordGrid();
+        };
+        grid.appendChild(input);
+      }
+    }
+    function verifyCrosswordGame() {
+      alert("تم فحص إجابات الكلمات المتقاطعة! +5 نقاط.");
+      addPointsToCurrentUser(5);
+    }
+
+    // السودوكو
+    let sdkMatrix = JSON.parse(localStorage.getItem('mustattab_sdk_matrix')) || Array(81).fill({ type: 'open', val: '' });
+    function initSudokuGrid() {
+      const grid = document.getElementById('sudoku-grid');
+      grid.innerHTML = '';
+      for(let i=0; i<81; i++) {
+        let cellData = sdkMatrix[i] || { type: 'open', val: '' };
+        let input = document.createElement('input');
+        input.type = 'text'; input.maxLength = 1; input.className = 'cell-9';
+        input.id = 'sdk-' + i;
+        if(cellData.type === 'fixed') { input.value = cellData.val; input.className += ' cell-fixed'; if(!isAdmin) input.readOnly = true; }
+        else { input.value = isAdmin ? cellData.val : ''; }
+
+        input.ondblclick = function() {
+          if(!isAdmin) return;
+          let mode = prompt("سودوكو:\n1. مخفية للزائر\n2. ثابتة مساعدة", "1");
+          if(mode === "1") {
+            let num = prompt("الرقم الصحيح:", "");
+            sdkMatrix[i] = { type: 'open', val: num ? num.trim() : '' };
+          } else if(mode === "2") {
+            let num = prompt("الرقم الثابت:", "5");
+            sdkMatrix[i] = { type: 'fixed', val: num ? num.trim() : '5' };
+          }
+          localStorage.setItem('mustattab_sdk_matrix', JSON.stringify(sdkMatrix));
+          initSudokuGrid();
+        };
+        grid.appendChild(input);
+      }
+    }
+    function verifySudoku9() {
+      alert("حل السودوكو صحيح! +5 نقاط.");
+      addPointsToCurrentUser(5);
+    }
+
+    function updateLeaderboard() {
+      let tbody = document.getElementById('leaderboard-rows');
+      tbody.innerHTML = '';
+      let sorted = [...usersDB].sort((a,b) => b.points - a.points);
+      if(sorted.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">لا يوجد مشاركون بعد</td></tr>'; return; }
+      sorted.forEach((u, i) => {
+        tbody.innerHTML += `<tr><td>${i+1}</td><td>${u.name}</td><td><strong>${u.points} نقطة</strong></td></tr>`;
+      });
+    }
+
+    // الإعلانات والأرشيف والتعليقات
+    let adsList = JSON.parse(localStorage.getItem('mustattab_ads')) || [];
+    function openAddAdModal() { document.getElementById('add-ad-modal').classList.add('active'); }
+    function saveNewAd() {
+      let type = document.getElementById('new-ad-type').value;
+      let title = document.getElementById('new-ad-title').value.trim();
+      let desc = document.getElementById('new-ad-desc').value.trim();
+      let link = document.getElementById('new-ad-link').value.trim() || '#';
+      if(title && desc) {
+        adsList.push({ id: Date.now(), type, title, desc, link });
+        localStorage.setItem('mustattab_ads', JSON.stringify(adsList));
+        closeModal('add-ad-modal');
+        alert("تمت الإضافة!");
+      }
+    }
+    function openOpportunitiesModal(type) {
+      let title = type === 'literary' ? "الإعلانات والفرص الأدبية" : "الإعلانات المتنوعة";
+      document.getElementById('opp-modal-title').innerText = title;
+      let container = document.getElementById('opp-modal-content');
+      container.innerHTML = '';
+      let filtered = adsList.filter(a => a.type === type);
+      if(filtered.length === 0) { container.innerHTML = '<p>لا توجد إعلانات حالياً.</p>'; }
+      else {
+        filtered.forEach(ad => {
+          container.innerHTML += `<div style="background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;"><h4 style="color:var(--burgundy);">${ad.title}</h4><p>${ad.desc}</p><a href="${ad.link}" target="_blank" class="btn" style="padding:4px 12px; font-size:0.85rem; margin-top:8px;">زيارة الرابط 🔗</a></div>`;
+        });
+      }
+      document.getElementById('opp-modal').classList.add('active');
+      toggleDrawer();
+    }
+
+    let archiveList = JSON.parse(localStorage.getItem('mustattab_archive')) || [];
+    function openArchiveModal() {
+      let container = document.getElementById('archive-list-container');
+      container.innerHTML = '';
+      archiveList.forEach(item => {
+        container.innerHTML += `<div style="background:#fbf9f4; border:1px solid #e0d4c0; padding:15px; border-radius:10px;"><strong>${item.title}</strong><br><small>${item.date}</small></div>`;
+      });
+      document.getElementById('archive-modal').classList.add('active');
+      toggleDrawer();
+    }
+    function openAddArchiveModal() {
+      let title = prompt("عنوان العدد الأرشيفي:");
+      let date = prompt("تاريخ العدد:");
+      if(title) {
+        archiveList.push({ id: Date.now(), title, date: date || "مؤرشف" });
+        localStorage.setItem('mustattab_archive', JSON.stringify(archiveList));
+        alert("تمت الإضافة للأرشيف!");
+      }
+    }
+
+    let commentsList = JSON.parse(localStorage.getItem('mustattab_comments')) || [];
+    function renderComments() {
+      let feed = document.getElementById('comments-feed');
+      feed.innerHTML = '';
+      commentsList.forEach((c) => {
+        feed.innerHTML += `<div class="comment-item"><strong>${c.name}</strong><p style="margin-top:4px;">${c.text}</p></div>`;
+      });
+    }
+    function addComment() {
+      let name = document.getElementById('comm-name').value.trim() || (currentUser ? currentUser.name : "زائر");
+      let text = document.getElementById('comm-text').value.trim();
+      if(!text) return;
+      commentsList.unshift({ name, text });
+      localStorage.setItem('mustattab_comments', JSON.stringify(commentsList));
+      renderComments();
+      document.getElementById('comm-text').value = '';
+    }
+
+    // عارض PDF
+    let pdfDoc = null, pageNum = 1;
+    const canvas = document.getElementById('pdf-canvas');
+    const ctx = canvas.getContext('2d');
+    function uploadCurrentPDF(input) {
+      if (input.files && input.files[0]) {
+        let fileURL = URL.createObjectURL(input.files[0]);
+        document.getElementById('download-pdf-btn').href = fileURL;
+        pdfjsLib.getDocument(fileURL).promise.then(function(loadedPdfDoc) {
+          pdfDoc = loadedPdfDoc; pageNum = 1; renderPdfPage(pageNum);
+          alert("تم رفع ملف الـ PDF وعرضه بنجاح!");
+        });
+      }
+    }
+    function renderPdfPage(num) {
+      if (!pdfDoc) {
+        canvas.width = 600; canvas.height = 800;
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#5c1e28"; ctx.font = "22px Amiri"; ctx.textAlign = "center";
+        ctx.fillText("ارفع ملف PDF للعدد الحالي من لوحة الإدارة", canvas.width/2, canvas.height/2);
+        document.getElementById('pdf-page-num').innerText = "1 / 1";
+        return;
+      }
+      pdfDoc.getPage(num).then(function(page) {
+        let viewport = page.getViewport({ scale: 1.3 });
+        canvas.height = viewport.height; canvas.width = viewport.width;
+        page.render({ canvasContext: ctx, viewport: viewport });
+        document.getElementById('pdf-page-num').innerText = num + " / " + pdfDoc.numPages;
+      });
+    }
+    function nextPdfPage() { if (pdfDoc && pageNum < pdfDoc.numPages) { pageNum++; renderPdfPage(pageNum); } }
+    function prevPdfPage() { if (pdfDoc && pageNum > 1) { pageNum--; renderPdfPage(pageNum); } }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSavedTexts();
+      initAudioPlayer();
+      initQuestionsSelect();
+      initCrosswordGrid();
+      initSudokuGrid();
+      renderCwClues();
+      renderComments();
+      updateLeaderboard();
+      renderPdfPage(pageNum);
+      if(currentUser) { document.getElementById('current-user-name').innerText = currentUser.name + " (" + currentUser.points + " ن)"; }
+    });
+
+    function openNewsDetailModal() {
+      document.getElementById('modal-news-title').innerText = document.getElementById('ticker-title-display').innerText;
+      document.getElementById('modal-news-desc').innerText = document.getElementById('ticker-desc-display').innerText;
+      document.getElementById('news-detail-modal').classList.add('active');
+    }
+  </script>
+</body>
+</html>
